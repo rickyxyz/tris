@@ -1,23 +1,37 @@
 <script lang="ts">
 import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
-import Entity from "./classes/Entity";
 
 export default {
   components: {
     GameArea,
     MoveSet,
-    Entity,
   },
   data() {
     return {
-      player: Entity(),
+      player: { coordinate: { x: 3, y: 3 }, sprite: "👑" },
+      moves: [
+        {
+          name: 'move',
+          action: 'move',
+          range: 1
+        },
+        {
+          name: 'neutral',
+          action: 'neutral',
+          range: 0
+        },
+        {},
+        {},
+        {},
+        {},
+      ],
       selectedMove: {},
     };
   },
   methods: {
     selectMove(move) {
-      this.selectedMove = move;
+      this.selectedMove = this.moves[move];
     },
   },
 };
@@ -27,9 +41,9 @@ export default {
   <main>
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">Status Bar</div>
-    <GameArea :entities="player" :selectedMove="selectedMove"></GameArea>
+    <GameArea :entities="player" :selectedMove="selectedMove" @moved="(idx)=>selectMove(idx)"></GameArea>
     <div id="combo_bar">Combo Bar</div>
-    <MoveSet @selectedMove="(move) => selectMove(move)"></MoveSet>
+    <MoveSet :moves="moves" @selectedMove="(move) => selectMove(move)"></MoveSet>
   </main>
 </template>
 

@@ -2,27 +2,12 @@
 export default {
   props: {
     selectedMove: Object,
+    moves: Array
   },
   emits: ['selectedMove'],
-  data() {
-    return {
-      moves: [
-        {
-          name: "move",
-          action: "move",
-          range: 1,
-        },
-        {},
-        {},
-        {},
-        {},
-        {},
-      ],
-    };
-  },
   methods: {
     move_click(e) {
-      this.$emit('selectedMove', this.moves[0])
+      this.$emit('selectedMove', e)
     },
   },
 };

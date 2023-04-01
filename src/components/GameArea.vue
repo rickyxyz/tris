@@ -4,20 +4,23 @@ export default {
     entities: Object,
     selectedMove: Object,
   },
+  emits: ["moved"],
   data() {
     return {
-      size: 3,
+      size: 5,
+      possibleMoves: Array(),
+      tileMap: Array(),
     };
   },
   computed: {
-    coordinates() {
-      let coordinates = new Array();
+    initialTileMap() {
+      let tiles = new Array();
       for (let y = this.size; y > 0; y--) {
         for (let x = 1; x <= this.size; x++) {
-          coordinates.push({ x, y });
+          tiles.push({ x, y, color: "white" });
         }
       }
-      return coordinates;
+      return tiles;
     },
     gridStyle() {
       return `repeat(${this.size}, 1fr)`;
@@ -27,18 +30,53 @@ export default {
     grid_click(c) {
       let currentPlayerPosition = `tile${this.entities.coordinate.x}${this.entities.coordinate.y}`;
       let clickedLocation = `tile${c.x}${c.y}`;
-      if(this.selectedMove.action) {
-        this.$refs[currentPlayerPosition][0].innerText = '';
-        this.$refs[clickedLocation][0].innerText = this.entities.sprite;
-        this.entities.coordinate = c;
+      let clickedIndex = (c.y - this.size) * this.size * -1 + c.x - 1;
+      if (this.selectedMove.action === "move") {
+        if (this.possibleMoves.includes(clickedIndex)) {
+          this.$refs[currentPlayerPosition][0].innerText = "";
+          this.$refs[clickedLocation][0].innerText = this.entities.sprite;
+          this.entities.coordinate = c;
+          this.$emit("moved", 1);
+        }
       }
-      console.log(c);
     },
   },
   watch: {
-    selectedMove(newMove) {
-      console.log(newMove);
-    }
+    selectedMove() {
+      let px = this.entities.coordinate.x;
+      let py = this.entities.coordinate.y;
+      if (this.selectedMove.action === "move") {
+        let range = this.selectedMove.range;
+        let area = [
+          { x: px + range, y: py },
+          { x: px - range, y: py },
+          { x: px, y: py + range },
+          { x: px, y: py - range },
+        ];
+        for (let tile of area) {
+          this.tileMap[
+            (tile.y - this.size) * this.size * -1 + tile.x - 1
+          ].color = "blue";
+          this.possibleMoves.push(
+            (tile.y - this.size) * this.size * -1 + tile.x - 1
+          );
+        }
+      } else {
+        for (let tile of this.possibleMoves) {
+          this.tileMap[tile].color = "white";
+        }
+        this.possibleMoves = [];
+      }
+    },
+    "entities.coordinate"() {
+      for (let tile of this.possibleMoves) {
+        this.tileMap[tile].color = "white";
+      }
+      this.possibleMoves = [];
+    },
+  },
+  beforeMount() {
+    this.tileMap = this.initialTileMap;
   },
   mounted() {
     let identifier = `tile${this.entities.coordinate.x}${this.entities.coordinate.y}`;
@@ -51,10 +89,11 @@ export default {
   <div id="game_area">
     <div id="game_grid">
       <div
-        v-for="(coordinate, idx) in this.coordinates"
+        v-for="(coordinate, idx) in this.tileMap"
         :key="idx"
         :ref="`tile${coordinate.x}${coordinate.y}`"
         class="game_tile"
+        :class="[this.tileMap[idx].color === 'blue' ? 'blue' : '']"
         @click="grid_click(coordinate)"
       ></div>
     </div>
@@ -77,10 +116,15 @@ export default {
 }
 
 .game_tile {
-  font-size: 2rem;
+  font-size: 1rem;
   border: solid black 1px;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: white;
+}
+
+.blue {
+  background-color: #2b55fcd8;
 }
 </style>
