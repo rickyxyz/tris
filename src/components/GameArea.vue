@@ -1,14 +1,28 @@
+<!--
+  steps:
+  1. detect a move has been selected
+  2. reset the move counter
+  3. determine possible click
+  4. fire click event
+  5. progress to next action
+  6. repeat until finish
+  7. if finish emit moved and reset action counter
+-->
+
 <script lang="ts">
+import {calculatePossibleMoves} from '../utils/Utils';
+
 export default {
   props: {
     entities: Object,
-    selectedMove: Object,
+    actions: Array,
   },
   emits: ["moved"],
   data() {
     return {
       size: 5,
       possibleMoves: Array(),
+      actionIndex: -1,
       tileMap: Array(),
     };
   },
@@ -31,48 +45,72 @@ export default {
       let currentPlayerPosition = `tile${this.entities.coordinate.x}${this.entities.coordinate.y}`;
       let clickedLocation = `tile${c.x}${c.y}`;
       let clickedIndex = (c.y - this.size) * this.size * -1 + c.x - 1;
-      if (this.selectedMove.action === "move") {
+      if (this.actions[this.actionIndex].type === "move") {
         if (this.possibleMoves.includes(clickedIndex)) {
           this.$refs[currentPlayerPosition][0].innerText = "";
           this.$refs[clickedLocation][0].innerText = this.entities.sprite;
           this.entities.coordinate = c;
-          this.$emit("moved", 1);
+          this.actionIndex++;
+        }
+      } else if (this.actions[this.actionIndex].type === "attack") {
+        if (this.possibleMoves.includes(clickedIndex)) {
+          this.$refs[clickedLocation][0].innerText = "⚔️";
+          this.actionIndex++;
         }
       }
     },
   },
   watch: {
-    selectedMove() {
-      let px = this.entities.coordinate.x;
-      let py = this.entities.coordinate.y;
-      if (this.selectedMove.action === "move") {
-        let range = this.selectedMove.range;
-        let area = [
-          { x: px + range, y: py },
-          { x: px - range, y: py },
-          { x: px, y: py + range },
-          { x: px, y: py - range },
-        ];
-        for (let tile of area) {
-          this.tileMap[
-            (tile.y - this.size) * this.size * -1 + tile.x - 1
-          ].color = "blue";
-          this.possibleMoves.push(
-            (tile.y - this.size) * this.size * -1 + tile.x - 1
-          );
-        }
-      } else {
-        for (let tile of this.possibleMoves) {
-          this.tileMap[tile].color = "white";
-        }
-        this.possibleMoves = [];
-      }
-    },
     "entities.coordinate"() {
       for (let tile of this.possibleMoves) {
         this.tileMap[tile].color = "white";
       }
       this.possibleMoves = [];
+    },
+    actionIndex() {
+      if (this.actionIndex === this.actions.length) {
+        this.possibleMoves = [];
+        this.$emit("moved", 1);
+        this.actionIndex = -1;
+      } else {
+        const x = this.entities.coordinate.x;
+        const y = this.entities.coordinate.y;
+        const range = this.actions[this.actionIndex].range;
+        if (this.actions[this.actionIndex].type === "move") {
+          let area = calculatePossibleMoves({x, y}, 'plus', range);
+          for (let tile of area) {
+            this.tileMap[
+              (tile.y - this.size) * this.size * -1 + tile.x - 1
+            ].color = "blue";
+            this.possibleMoves.push(
+              (tile.y - this.size) * this.size * -1 + tile.x - 1
+            );
+          }
+        } else if (this.actions[this.actionIndex].type === "attack") {
+          let area = calculatePossibleMoves({x, y}, 'plus', range);
+          for (let tile of area) {
+            this.tileMap[
+              (tile.y - this.size) * this.size * -1 + tile.x - 1
+            ].color = "red";
+            this.possibleMoves.push(
+              (tile.y - this.size) * this.size * -1 + tile.x - 1
+            );
+          }
+        } else {
+          for (let tile of this.possibleMoves) {
+            this.tileMap[tile].color = "white";
+          }
+          this.possibleMoves = [];
+        }
+      }
+    },
+    actions() {
+      for (let tile of this.possibleMoves) {
+        this.tileMap[tile].color = "white";
+      }
+      this.possibleMoves = [];
+      this.actionIndex = -1;
+      this.actionIndex++;
     },
   },
   beforeMount() {
@@ -126,5 +164,9 @@ export default {
 
 .blue {
   background-color: #2b55fcd8;
+}
+
+.red {
+  background-color: #ff3628d8;
 }
 </style>
