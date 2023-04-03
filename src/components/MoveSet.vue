@@ -1,15 +1,9 @@
 <script lang="ts">
 export default {
   props: {
-    selectedMove: Object,
     moves: Array
   },
   emits: ['selectedMove'],
-  methods: {
-    move_click(e) {
-      this.$emit('selectedMove', e)
-    },
-  },
 };
 </script>
 
@@ -18,8 +12,7 @@ export default {
     <div
       v-for="(move, idx) in this.moves"
       :key="idx"
-      :ref="`move${idx}`"
-      @click="move_click(idx)"
+      @click="this.$emit('selectedMove', idx)"
     >
       {{ move.name }}
     </div>
