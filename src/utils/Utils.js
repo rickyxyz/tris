@@ -1,15 +1,17 @@
-function calculatePossibleMoves(startLocation, shape, size) {
+function calculatePossibleMoves(startLocation, shape, range, bound) {
   let possibleMoves = [];
   const {x, y} = startLocation;
   switch (shape) {
     case "plus":
       possibleMoves = [
-        { x: x + size, y: y },
-        { x: x - size, y: y },
-        { x: x, y: y + size },
-        { x: x, y: y - size },
+        { x: x + range, y: y },
+        { x: x - range, y: y },
+        { x: x, y: y + range },
+        { x: x, y: y - range },
       ];
   }
+
+  possibleMoves = possibleMoves.filter(({x, y}) => y > 0 && x > 0 && y < bound && x < bound);
 
   return possibleMoves;
 }

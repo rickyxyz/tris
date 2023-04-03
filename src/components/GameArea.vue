@@ -1,28 +1,16 @@
-<!--
-  steps:
-  1. detect a move has been selected
-  2. reset the move counter
-  3. determine possible click
-  4. fire click event
-  5. progress to next action
-  6. repeat until finish
-  7. if finish emit moved and reset action counter
--->
-
 <script lang="ts">
 import { calculatePossibleMoves, coordinateToIndex } from "../utils/Utils";
 
 export default {
   props: {
     entities: Object,
-    actions: Array,
+    action: Object,
   },
   emits: ["moved"],
   data() {
     return {
       size: 5,
       possibleMoves: Array(),
-      actionIndex: -1,
       tileMap: Array(),
     };
   },
@@ -55,20 +43,13 @@ export default {
     generateAction() {
       const x = this.entities.coordinate.x;
       const y = this.entities.coordinate.y;
-      const range = this.actions[this.actionIndex].range;
+      const range = this.action.range;
 
-      if (this.actions[this.actionIndex].type === "move") {
-        let area = calculatePossibleMoves({ x, y }, "plus", range);
+      if (this.action.type === "move") {
+        let area = calculatePossibleMoves({ x, y }, "plus", range, this.size);
         for (let tile of area) {
           const idx = coordinateToIndex(tile.x, tile.y, this.size);
           this.tileMap[idx].color = "blue";
-          this.possibleMoves.push(idx);
-        }
-      } else if (this.actions[this.actionIndex].type === "attack") {
-        let area = calculatePossibleMoves({ x, y }, "plus", range);
-        for (let tile of area) {
-          const idx = coordinateToIndex(tile.x, tile.y, this.size);
-          this.tileMap[idx].color = "red";
           this.possibleMoves.push(idx);
         }
       }
@@ -80,37 +61,21 @@ export default {
         this.size
       );
       const clickedIndex = coordinateToIndex(c.x, c.y, this.size);
-      if (this.actions[this.actionIndex].type === "move") {
+      if (this.action.type === "move") {
         if (this.possibleMoves.includes(clickedIndex)) {
           this.tileMap[currentPlayerIndex].sprite = "";
           this.tileMap[clickedIndex].sprite = this.entities.sprite;
           this.entities.coordinate = c;
-          this.actionIndex++;
           this.clearPossiblemoves();
-        }
-      } else if (this.actions[this.actionIndex].type === "attack") {
-        if (this.possibleMoves.includes(clickedIndex)) {
-          this.tileMap[clickedIndex].sprite = "⚔️";
-          this.actionIndex++;
-          this.clearPossiblemoves();
+          this.$emit('moved', 1);
         }
       }
     },
   },
   watch: {
-    actions() {
-      this.actionIndex = -1;
-      this.actionIndex++;
+    action() {
+      this.clearPossiblemoves();
       this.generateAction();
-    },
-    actionIndex(oldValue, newValue) {
-      if (this.actionIndex >= this.actions.length) {
-        this.possibleMoves = [];
-        this.$emit("moved", 1);
-        this.actionIndex = -1;
-      } else {
-        this.generateAction()
-      }
     },
   },
   beforeMount() {

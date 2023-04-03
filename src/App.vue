@@ -12,29 +12,20 @@ export default {
       player: { coordinate: { x: 3, y: 3 }, sprite: "👑" },
       moves: [
         {
-          name: 'slice',
-          actions: [
-            {
-              type: 'move',
-              direction: 'plus',
-              range: 1
-            },
-            {
-              type: 'attack',
-              direction: 'plus',
-              range: 1
-            }
-          ],
+          name: "slice",
+          action: {
+            type: "move",
+            direction: "plus",
+            range: 1,
+          },
         },
         {
-          name: 'neutral',
-          actions: [
-            {
-              type: 'neutral',
-              direction: 'radius',
-              range: 0
-            }
-          ],
+          name: "neutral",
+          action: {
+            type: "neutral",
+            direction: "radius",
+            range: 0,
+          },
         },
         {},
         {},
@@ -56,9 +47,16 @@ export default {
   <main>
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">Status Bar</div>
-    <GameArea :entities="player" :actions="selectedMove.actions" @moved="(idx)=>selectMove(idx)"></GameArea>
+    <GameArea
+      :entities="player"
+      :action="selectedMove.action"
+      @moved="(idx) => selectMove(idx)"
+    ></GameArea>
     <div id="combo_bar">Combo Bar</div>
-    <MoveSet :moves="moves" @selectedMove="(move) => selectMove(move)"></MoveSet>
+    <MoveSet
+      :moves="moves"
+      @selectedMove="(move) => selectMove(move)"
+    ></MoveSet>
   </main>
 </template>
 
