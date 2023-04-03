@@ -9,22 +9,37 @@ export default {
   },
   data() {
     return {
-      player: { coordinate: { x: 3, y: 3 }, sprite: "👑" },
+      player: { name: "player", coordinate: { x: 3, y: 3 }, sprite: "👑" },
+      entities: [
+        {
+          name: "monster",
+          coordinate: { x: 4, y: 4 },
+          sprite: "🦖",
+        },
+      ],
+      neutral: {
+        name: "neutral",
+        action: {
+          type: "neutral",
+          direction: "plus",
+          range: 1,
+        },
+      },
       moves: [
         {
           name: "slice",
           action: {
             type: "move",
             direction: "plus",
-            range: 1,
+            range: 2,
           },
         },
         {
-          name: "neutral",
+          name: "rush",
           action: {
-            type: "neutral",
-            direction: "radius",
-            range: 0,
+            type: "move",
+            direction: "cross",
+            range: 2,
           },
         },
         {},
@@ -37,7 +52,15 @@ export default {
   },
   methods: {
     selectMove(move) {
-      this.selectedMove = this.moves[move];
+      if (move >= 0) {
+        if (this.selectedMove === this.moves[move]) {
+          this.selectedMove = this.neutral;
+        } else {
+          this.selectedMove = this.moves[move];
+        }
+      } else {
+        this.selectedMove = this.neutral;
+      }
     },
   },
 };
@@ -48,9 +71,10 @@ export default {
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">Status Bar</div>
     <GameArea
-      :entities="player"
+      :player="player"
+      :entities="entities"
       :action="selectedMove.action"
-      @moved="(idx) => selectMove(idx)"
+      @moved="selectMove(-1)"
     ></GameArea>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet

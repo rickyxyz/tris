@@ -3,6 +3,7 @@ import { calculatePossibleMoves, coordinateToIndex } from "../utils/Utils";
 
 export default {
   props: {
+    player: Object,
     entities: Object,
     action: Object,
   },
@@ -41,12 +42,12 @@ export default {
       this.possibleMoves = [];
     },
     generateAction() {
-      const x = this.entities.coordinate.x;
-      const y = this.entities.coordinate.y;
+      const x = this.player.coordinate.x;
+      const y = this.player.coordinate.y;
       const range = this.action.range;
 
       if (this.action.type === "move") {
-        let area = calculatePossibleMoves({ x, y }, "plus", range, this.size);
+        let area = calculatePossibleMoves({ x, y }, this.action.direction, range, this.size);
         for (let tile of area) {
           const idx = coordinateToIndex(tile.x, tile.y, this.size);
           this.tileMap[idx].color = "blue";
@@ -56,18 +57,18 @@ export default {
     },
     grid_click(c) {
       const currentPlayerIndex = coordinateToIndex(
-        this.entities.coordinate.x,
-        this.entities.coordinate.y,
+        this.player.coordinate.x,
+        this.player.coordinate.y,
         this.size
       );
       const clickedIndex = coordinateToIndex(c.x, c.y, this.size);
       if (this.action.type === "move") {
         if (this.possibleMoves.includes(clickedIndex)) {
           this.tileMap[currentPlayerIndex].sprite = "";
-          this.tileMap[clickedIndex].sprite = this.entities.sprite;
-          this.entities.coordinate = c;
+          this.tileMap[clickedIndex].sprite = this.player.sprite;
+          this.player.coordinate = c;
           this.clearPossiblemoves();
-          this.$emit('moved', 1);
+          this.$emit('moved');
         }
       }
     },
@@ -83,11 +84,11 @@ export default {
   },
   mounted() {
     const idx = coordinateToIndex(
-      this.entities.coordinate.x,
-      this.entities.coordinate.y,
+      this.player.coordinate.x,
+      this.player.coordinate.y,
       this.size
     );
-    this.tileMap[idx].sprite = this.entities.sprite;
+    this.tileMap[idx].sprite = this.player.sprite;
   },
 };
 </script>
