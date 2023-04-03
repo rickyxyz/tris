@@ -10,7 +10,7 @@
 -->
 
 <script lang="ts">
-import {calculatePossibleMoves} from '../utils/Utils';
+import { calculatePossibleMoves, coordinateToIndex } from "../utils/Utils";
 
 export default {
   props: {
@@ -28,10 +28,15 @@ export default {
   },
   computed: {
     initialTileMap() {
-      let tiles = new Array();
+      let tiles = {};
       for (let y = this.size; y > 0; y--) {
         for (let x = 1; x <= this.size; x++) {
-          tiles.push({ x, y, color: "white" });
+          tiles[coordinateToIndex(x, y, this.size)] = {
+            x,
+            y,
+            color: "white",
+            sprite: "",
+          };
         }
       }
       return tiles;
@@ -41,84 +46,83 @@ export default {
     },
   },
   methods: {
+    clearPossiblemoves() {
+      for (let tile of this.possibleMoves) {
+        this.tileMap[tile].color = "white";
+      }
+      this.possibleMoves = [];
+    },
+    generateAction() {
+      const x = this.entities.coordinate.x;
+      const y = this.entities.coordinate.y;
+      const range = this.actions[this.actionIndex].range;
+
+      if (this.actions[this.actionIndex].type === "move") {
+        let area = calculatePossibleMoves({ x, y }, "plus", range);
+        for (let tile of area) {
+          const idx = coordinateToIndex(tile.x, tile.y, this.size);
+          this.tileMap[idx].color = "blue";
+          this.possibleMoves.push(idx);
+        }
+      } else if (this.actions[this.actionIndex].type === "attack") {
+        let area = calculatePossibleMoves({ x, y }, "plus", range);
+        for (let tile of area) {
+          const idx = coordinateToIndex(tile.x, tile.y, this.size);
+          this.tileMap[idx].color = "red";
+          this.possibleMoves.push(idx);
+        }
+      }
+    },
     grid_click(c) {
-      let currentPlayerPosition = `tile${this.entities.coordinate.x}${this.entities.coordinate.y}`;
-      let clickedLocation = `tile${c.x}${c.y}`;
-      let clickedIndex = (c.y - this.size) * this.size * -1 + c.x - 1;
+      const currentPlayerIndex = coordinateToIndex(
+        this.entities.coordinate.x,
+        this.entities.coordinate.y,
+        this.size
+      );
+      const clickedIndex = coordinateToIndex(c.x, c.y, this.size);
       if (this.actions[this.actionIndex].type === "move") {
         if (this.possibleMoves.includes(clickedIndex)) {
-          this.$refs[currentPlayerPosition][0].innerText = "";
-          this.$refs[clickedLocation][0].innerText = this.entities.sprite;
+          this.tileMap[currentPlayerIndex].sprite = "";
+          this.tileMap[clickedIndex].sprite = this.entities.sprite;
           this.entities.coordinate = c;
           this.actionIndex++;
+          this.clearPossiblemoves();
         }
       } else if (this.actions[this.actionIndex].type === "attack") {
         if (this.possibleMoves.includes(clickedIndex)) {
-          this.$refs[clickedLocation][0].innerText = "⚔️";
+          this.tileMap[clickedIndex].sprite = "⚔️";
           this.actionIndex++;
+          this.clearPossiblemoves();
         }
       }
     },
   },
   watch: {
-    "entities.coordinate"() {
-      for (let tile of this.possibleMoves) {
-        this.tileMap[tile].color = "white";
-      }
-      this.possibleMoves = [];
+    actions() {
+      this.actionIndex = -1;
+      this.actionIndex++;
+      this.generateAction();
     },
-    actionIndex() {
-      if (this.actionIndex === this.actions.length) {
+    actionIndex(oldValue, newValue) {
+      if (this.actionIndex >= this.actions.length) {
         this.possibleMoves = [];
         this.$emit("moved", 1);
         this.actionIndex = -1;
       } else {
-        const x = this.entities.coordinate.x;
-        const y = this.entities.coordinate.y;
-        const range = this.actions[this.actionIndex].range;
-        if (this.actions[this.actionIndex].type === "move") {
-          let area = calculatePossibleMoves({x, y}, 'plus', range);
-          for (let tile of area) {
-            this.tileMap[
-              (tile.y - this.size) * this.size * -1 + tile.x - 1
-            ].color = "blue";
-            this.possibleMoves.push(
-              (tile.y - this.size) * this.size * -1 + tile.x - 1
-            );
-          }
-        } else if (this.actions[this.actionIndex].type === "attack") {
-          let area = calculatePossibleMoves({x, y}, 'plus', range);
-          for (let tile of area) {
-            this.tileMap[
-              (tile.y - this.size) * this.size * -1 + tile.x - 1
-            ].color = "red";
-            this.possibleMoves.push(
-              (tile.y - this.size) * this.size * -1 + tile.x - 1
-            );
-          }
-        } else {
-          for (let tile of this.possibleMoves) {
-            this.tileMap[tile].color = "white";
-          }
-          this.possibleMoves = [];
-        }
+        this.generateAction()
       }
-    },
-    actions() {
-      for (let tile of this.possibleMoves) {
-        this.tileMap[tile].color = "white";
-      }
-      this.possibleMoves = [];
-      this.actionIndex = -1;
-      this.actionIndex++;
     },
   },
   beforeMount() {
     this.tileMap = this.initialTileMap;
   },
   mounted() {
-    let identifier = `tile${this.entities.coordinate.x}${this.entities.coordinate.y}`;
-    this.$refs[identifier][0].innerText = this.entities.sprite;
+    const idx = coordinateToIndex(
+      this.entities.coordinate.x,
+      this.entities.coordinate.y,
+      this.size
+    );
+    this.tileMap[idx].sprite = this.entities.sprite;
   },
 };
 </script>
@@ -127,13 +131,14 @@ export default {
   <div id="game_area">
     <div id="game_grid">
       <div
-        v-for="(coordinate, idx) in this.tileMap"
+        v-for="(tile, idx) in this.tileMap"
         :key="idx"
-        :ref="`tile${coordinate.x}${coordinate.y}`"
         class="game_tile"
-        :class="[this.tileMap[idx].color === 'blue' ? 'blue' : '']"
-        @click="grid_click(coordinate)"
-      ></div>
+        :class="[tile.color]"
+        @click="grid_click(tile)"
+      >
+        {{ tile.sprite }}
+      </div>
     </div>
   </div>
 </template>

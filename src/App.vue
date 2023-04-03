@@ -16,12 +16,12 @@ export default {
           actions: [
             {
               type: 'move',
-              direction: 'radius',
+              direction: 'plus',
               range: 1
             },
             {
               type: 'attack',
-              direction: 'one_direction',
+              direction: 'plus',
               range: 1
             }
           ],
@@ -30,7 +30,9 @@ export default {
           name: 'neutral',
           actions: [
             {
-              type: 'neutral'
+              type: 'neutral',
+              direction: 'radius',
+              range: 0
             }
           ],
         },

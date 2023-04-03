@@ -14,4 +14,8 @@ function calculatePossibleMoves(startLocation, shape, size) {
   return possibleMoves;
 }
 
-export { calculatePossibleMoves };
+function coordinateToIndex(x, y, size) {
+  return (y - size) * size * -1 + x - 1;
+}
+
+export { calculatePossibleMoves, coordinateToIndex };
