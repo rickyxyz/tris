@@ -10,7 +10,7 @@ export default {
   emits: ["moved"],
   data() {
     return {
-      size: 5,
+      size: 9,
       possibleMoves: Array(),
       tileMap: Array(),
     };
