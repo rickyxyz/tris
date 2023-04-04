@@ -12,7 +12,7 @@ export default {
       player: {
         name: "hero",
         type: "player",
-        coordinate: { x: 5, y: 5 },
+        coordinate: { x: 3, y: 3 },
         sprite: "👑",
       },
       entities: [
@@ -62,7 +62,7 @@ export default {
         {
           name: "explode",
           action: {
-            type: "move",
+            type: "collateral",
             direction: "radius",
             range: 2,
             damage: 1,

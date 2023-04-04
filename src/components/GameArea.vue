@@ -1,5 +1,9 @@
 <script lang="ts">
-import { calculatePossibleMoves, coordinateToIndex, calculateCollisionResult } from "../utils/Utils";
+import {
+  calculatePossibleMoves,
+  coordinateToIndex,
+  calculateCollisionResult,
+} from "../utils/Utils";
 
 export default {
   props: {
@@ -10,7 +14,7 @@ export default {
   emits: ["moved"],
   data() {
     return {
-      size: 9,
+      size: 5,
       possibleMoves: Array(),
       tileMap: Array(),
     };
@@ -41,20 +45,27 @@ export default {
       this.possibleMoves = [];
     },
     generateAction() {
+      let area = calculatePossibleMoves(
+        this.player.coordinate,
+        this.action.direction,
+        this.action.range,
+        this.size
+      );
       if (this.action.type === "move") {
-        let area = calculatePossibleMoves(
-          this.player.coordinate,
-          this.action.direction,
-          this.action.range,
-          this.size
-        );
         for (let tile of area) {
           const idx = coordinateToIndex(tile, this.size);
-          if(this.tileMap[idx].entity.type === "monster") {
+          if (this.tileMap[idx].entity.type === "monster") {
             this.tileMap[idx].color = "red";
           } else {
             this.tileMap[idx].color = "blue";
           }
+          this.possibleMoves.push(idx);
+        }
+      }
+      else if(this.action.type === "collateral") {
+        for (let tile of area) {
+          const idx = coordinateToIndex(tile, this.size);
+          this.tileMap[idx].color = "red";
           this.possibleMoves.push(idx);
         }
       }
@@ -72,12 +83,31 @@ export default {
             this.tileMap[clickedIndex].entity.health -= this.action.damage;
           }
           if (this.tileMap[clickedIndex].entity.health > 0) {
-            const collisionResult = calculateCollisionResult(this.player.coordinate, tile.coordinate);
-            this.tileMap[coordinateToIndex(collisionResult, this.size)].entity = this.player;
+            const collisionResult = calculateCollisionResult(
+              this.player.coordinate,
+              tile.coordinate
+            );
+            this.tileMap[coordinateToIndex(collisionResult, this.size)].entity =
+              this.player;
             this.player.coordinate = collisionResult;
           } else {
             this.tileMap[clickedIndex].entity = this.player;
             this.player.coordinate = tile.coordinate;
+          }
+          this.clearPossiblemoves();
+          this.$emit("moved");
+        }
+      }
+      else if(this.action.type === "collateral") {
+        if (this.possibleMoves.includes(clickedIndex)) {
+          this.player.health -= this.action.damage;
+          for (let tile of this.possibleMoves) {
+            if (this.tileMap[tile].entity) {
+              this.tileMap[tile].entity.health -= this.action.damage;
+            }
+            if(this.tileMap[tile].entity.health <= 0) {
+              this.tileMap[tile].entity = {}
+            }
           }
           this.clearPossiblemoves();
           this.$emit("moved");
