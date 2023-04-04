@@ -1,6 +1,7 @@
 <script lang="ts">
 import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
+import Moves from "./Data/Moves.js";
 
 export default {
   components: {
@@ -14,6 +15,8 @@ export default {
         type: "player",
         coordinate: { x: 3, y: 3 },
         sprite: "👑",
+        health: 3,
+        moves: [Moves.rush, Moves.slice, Moves.explode],
       },
       entities: [
         {
@@ -22,6 +25,7 @@ export default {
           coordinate: { x: 4, y: 4 },
           sprite: "🦖",
           health: 1,
+          moves: [Moves.rush]
         },
         {
           name: "sauropod",
@@ -29,62 +33,27 @@ export default {
           coordinate: { x: 3, y: 5 },
           sprite: "🦕",
           health: 2,
+          moves: [Moves.slice]
         },
-      ],
-      neutral: {
-        name: "neutral",
-        action: {
-          type: "neutral",
-          direction: "plus",
-          range: 0,
-          damage: 0,
-        },
-      },
-      moves: [
-        {
-          name: "slice",
-          action: {
-            type: "move",
-            direction: "plus",
-            range: 2,
-            damage: 1,
-          },
-        },
-        {
-          name: "rush",
-          action: {
-            type: "move",
-            direction: "cross",
-            range: 2,
-            damage: 1,
-          },
-        },
-        {
-          name: "explode",
-          action: {
-            type: "collateral",
-            direction: "radius",
-            range: 2,
-            damage: 1,
-          },
-        },
-        {},
-        {},
-        {},
       ],
       selectedMove: {} as any,
+      isPlayerTurn: true,
     };
   },
   methods: {
+    switchTurn() {
+      this.isPlayerTurn = !this.isPlayerTurn;
+      this.selectMove(-1);
+    },
     selectMove(move) {
       if (move >= 0) {
-        if (this.selectedMove === this.moves[move]) {
-          this.selectedMove = this.neutral;
+        if (this.selectedMove === this.player.moves[move]) {
+          this.selectedMove = Moves.neutral;
         } else {
-          this.selectedMove = this.moves[move];
+          this.selectedMove = this.player.moves[move];
         }
       } else {
-        this.selectedMove = this.neutral;
+        this.selectedMove = Moves.neutral;
       }
     },
   },
@@ -94,16 +63,20 @@ export default {
 <template>
   <main>
     <div id="menu_bar">Menu Bar</div>
-    <div id="status_bar">Status Bar</div>
+    <div id="status_bar">
+      Status Bar | HP: {{ this.player.health }} |
+      {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
+    </div>
     <GameArea
       :player="player"
       :entities="entities"
       :action="selectedMove.action"
-      @moved="selectMove(-1)"
+      :isPlayerTurn="isPlayerTurn"
+      @endTurn="switchTurn()"
     ></GameArea>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet
-      :moves="moves"
+      :moves="this.player.moves"
       @selectedMove="(move) => selectMove(move)"
     ></MoveSet>
   </main>

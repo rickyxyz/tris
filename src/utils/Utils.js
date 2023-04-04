@@ -1,3 +1,7 @@
+function timeout(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function rangeBetween(start, end, step = 1) {
   let arr = [];
   if (end >= start) {
@@ -136,4 +140,4 @@ function calculateCollisionResult({ x: x1, y: y1 }, { x: x2, y: y2 }) {
   return { x: rx, y: ry };
 }
 
-export { calculatePossibleMoves, coordinateToIndex, calculateCollisionResult };
+export { calculatePossibleMoves, coordinateToIndex, calculateCollisionResult, timeout };

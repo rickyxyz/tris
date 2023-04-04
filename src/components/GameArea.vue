@@ -3,6 +3,7 @@ import {
   calculatePossibleMoves,
   coordinateToIndex,
   calculateCollisionResult,
+  timeout,
 } from "../utils/Utils";
 
 export default {
@@ -10,8 +11,9 @@ export default {
     player: Object,
     entities: Array,
     action: Object,
+    isPlayerTurn: Boolean,
   },
-  emits: ["moved"],
+  emits: ["endTurn"],
   data() {
     return {
       size: 5,
@@ -45,6 +47,7 @@ export default {
       this.possibleMoves = [];
     },
     generateAction() {
+      // console.log("generate action");
       let area = calculatePossibleMoves(
         this.player.coordinate,
         this.action.direction,
@@ -61,8 +64,7 @@ export default {
           }
           this.possibleMoves.push(idx);
         }
-      }
-      else if(this.action.type === "collateral") {
+      } else if (this.action.type === "collateral") {
         for (let tile of area) {
           const idx = coordinateToIndex(tile, this.size);
           this.tileMap[idx].color = "red";
@@ -71,6 +73,7 @@ export default {
       }
     },
     grid_click(tile) {
+      // console.log("grid click");
       const currentPlayerIndex = coordinateToIndex(
         this.player.coordinate,
         this.size
@@ -95,30 +98,60 @@ export default {
             this.player.coordinate = tile.coordinate;
           }
           this.clearPossiblemoves();
-          this.$emit("moved");
+          this.$emit("endTurn");
         }
-      }
-      else if(this.action.type === "collateral") {
+      } else if (this.action.type === "collateral") {
         if (this.possibleMoves.includes(clickedIndex)) {
           this.player.health -= this.action.damage;
           for (let tile of this.possibleMoves) {
             if (this.tileMap[tile].entity) {
               this.tileMap[tile].entity.health -= this.action.damage;
             }
-            if(this.tileMap[tile].entity.health <= 0) {
-              this.tileMap[tile].entity = {}
+            if (this.tileMap[tile].entity.health <= 0) {
+              this.tileMap[tile].entity = {};
             }
           }
           this.clearPossiblemoves();
-          this.$emit("moved");
+          this.$emit("endTurn");
         }
       }
+    },
+    async enemyTurn() {
+      let o = 1;
+
+      for (let entity of this.entities) {
+        let move = entity.moves[0];
+
+        let area = calculatePossibleMoves(
+          entity.coordinate,
+          move.action.direction,
+          move.action.range,
+          this.size
+        );
+
+        for (let tile of area) {
+          const idx = coordinateToIndex(tile, this.size);
+          this.tileMap[idx].color = "blue";
+          this.possibleMoves.push(idx);
+        }
+        await timeout(500);
+        this.clearPossiblemoves();
+        await timeout(100);
+      }
+      this.$emit("endTurn");
     },
   },
   watch: {
     action() {
-      this.clearPossiblemoves();
-      this.generateAction();
+      if (this.isPlayerTurn) {
+        this.clearPossiblemoves();
+        this.generateAction();
+      }
+    },
+    isPlayerTurn() {
+      if (!this.isPlayerTurn) {
+        this.enemyTurn();
+      }
     },
   },
   beforeMount() {
