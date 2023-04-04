@@ -1,10 +1,10 @@
 <script lang="ts">
-import { calculatePossibleMoves, coordinateToIndex } from "../utils/Utils";
+import { calculatePossibleMoves, coordinateToIndex, calculateCollisionResult } from "../utils/Utils";
 
 export default {
   props: {
     player: Object,
-    entities: Object,
+    entities: Array,
     action: Object,
   },
   emits: ["moved"],
@@ -20,11 +20,10 @@ export default {
       let tiles = {};
       for (let y = this.size; y > 0; y--) {
         for (let x = 1; x <= this.size; x++) {
-          tiles[coordinateToIndex(x, y, this.size)] = {
-            x,
-            y,
+          tiles[coordinateToIndex({ x, y }, this.size)] = {
+            coordinate: { x, y },
             color: "white",
-            sprite: "",
+            entity: {},
           };
         }
       }
@@ -42,33 +41,46 @@ export default {
       this.possibleMoves = [];
     },
     generateAction() {
-      const x = this.player.coordinate.x;
-      const y = this.player.coordinate.y;
-      const range = this.action.range;
-
       if (this.action.type === "move") {
-        let area = calculatePossibleMoves({ x, y }, this.action.direction, range, this.size);
+        let area = calculatePossibleMoves(
+          this.player.coordinate,
+          this.action.direction,
+          this.action.range,
+          this.size
+        );
         for (let tile of area) {
-          const idx = coordinateToIndex(tile.x, tile.y, this.size);
-          this.tileMap[idx].color = "blue";
+          const idx = coordinateToIndex(tile, this.size);
+          if(this.tileMap[idx].entity.type === "monster") {
+            this.tileMap[idx].color = "red";
+          } else {
+            this.tileMap[idx].color = "blue";
+          }
           this.possibleMoves.push(idx);
         }
       }
     },
-    grid_click(c) {
+    grid_click(tile) {
       const currentPlayerIndex = coordinateToIndex(
-        this.player.coordinate.x,
-        this.player.coordinate.y,
+        this.player.coordinate,
         this.size
       );
-      const clickedIndex = coordinateToIndex(c.x, c.y, this.size);
+      const clickedIndex = coordinateToIndex(tile.coordinate, this.size);
       if (this.action.type === "move") {
         if (this.possibleMoves.includes(clickedIndex)) {
-          this.tileMap[currentPlayerIndex].sprite = "";
-          this.tileMap[clickedIndex].sprite = this.player.sprite;
-          this.player.coordinate = c;
+          this.tileMap[currentPlayerIndex].entity = {};
+          if (this.tileMap[clickedIndex].entity) {
+            this.tileMap[clickedIndex].entity.health -= this.action.damage;
+          }
+          if (this.tileMap[clickedIndex].entity.health > 0) {
+            const collisionResult = calculateCollisionResult(this.player.coordinate, tile.coordinate);
+            this.tileMap[coordinateToIndex(collisionResult, this.size)].entity = this.player;
+            this.player.coordinate = collisionResult;
+          } else {
+            this.tileMap[clickedIndex].entity = this.player;
+            this.player.coordinate = tile.coordinate;
+          }
           this.clearPossiblemoves();
-          this.$emit('moved');
+          this.$emit("moved");
         }
       }
     },
@@ -83,12 +95,12 @@ export default {
     this.tileMap = this.initialTileMap;
   },
   mounted() {
-    const idx = coordinateToIndex(
-      this.player.coordinate.x,
-      this.player.coordinate.y,
-      this.size
-    );
-    this.tileMap[idx].sprite = this.player.sprite;
+    for (let entity of this.entities) {
+      let idx = coordinateToIndex(entity.coordinate, this.size);
+      this.tileMap[idx].entity = entity;
+    }
+    const idx = coordinateToIndex(this.player.coordinate, this.size);
+    this.tileMap[idx].entity = this.player;
   },
 };
 </script>
@@ -103,7 +115,7 @@ export default {
         :class="[tile.color]"
         @click="grid_click(tile)"
       >
-        {{ tile.sprite }}
+        {{ tile.entity.sprite }}
       </div>
     </div>
   </div>
@@ -134,10 +146,10 @@ export default {
 }
 
 .blue {
-  background-color: #2b55fcd8;
+  background-color: #2a6aff88;
 }
 
 .red {
-  background-color: #ff3628d8;
+  background-color: #ff362888;
 }
 </style>

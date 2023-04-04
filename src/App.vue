@@ -9,12 +9,26 @@ export default {
   },
   data() {
     return {
-      player: { name: "player", coordinate: { x: 3, y: 3 }, sprite: "👑" },
+      player: {
+        name: "hero",
+        type: "player",
+        coordinate: { x: 3, y: 3 },
+        sprite: "👑",
+      },
       entities: [
         {
-          name: "monster",
+          name: "t-rex",
+          type: "monster",
           coordinate: { x: 4, y: 4 },
           sprite: "🦖",
+          health: 1,
+        },
+        {
+          name: "sauropod",
+          type: "monster",
+          coordinate: { x: 3, y: 5 },
+          sprite: "🦕",
+          health: 2,
         },
       ],
       neutral: {
@@ -22,7 +36,8 @@ export default {
         action: {
           type: "neutral",
           direction: "plus",
-          range: 1,
+          range: 0,
+          damage: 0
         },
       },
       moves: [
@@ -32,6 +47,7 @@ export default {
             type: "move",
             direction: "plus",
             range: 2,
+            damage: 1,
           },
         },
         {
@@ -40,6 +56,7 @@ export default {
             type: "move",
             direction: "cross",
             range: 2,
+            damage: 1,
           },
         },
         {},
