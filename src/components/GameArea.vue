@@ -121,6 +121,8 @@ export default {
 
       for (let entity of this.entities) {
         let move = entity.moves[0];
+        let closest_tile = {x: -1, y: -1};
+        let actionTaken = false;
 
         let area = calculatePossibleMoves(
           entity.coordinate,
@@ -129,12 +131,55 @@ export default {
           this.size
         );
 
+        area = area.filter((tile) => {
+          return !this.tileMap[coordinateToIndex(tile, this.size)].entity.name || this.tileMap[coordinateToIndex(tile, this.size)].entity === this.player;
+        })
+
+        if(area.length > 0) {
+          closest_tile = area.reduce((prev, curr) => {
+            let newDiff = Math.abs(this.player.coordinate.x - curr.x) + Math.abs(this.player.coordinate.y - curr.y);
+            let oldDiff = Math.abs(this.player.coordinate.x - prev.x) + Math.abs(this.player.coordinate.y - prev.y);
+
+            return newDiff <= oldDiff? curr: prev;
+          })
+        }
+
+        for(let tile of area) {
+          const idx = coordinateToIndex(tile, this.size);
+          this.possibleMoves.push(idx);
+
+          if(this.tileMap[idx].entity === this.player) {
+            this.tileMap[idx].color = "red";
+          } else {
+            this.tileMap[idx].color = "blue";
+          }
+        }
+
         for (let tile of area) {
           const idx = coordinateToIndex(tile, this.size);
-          this.tileMap[idx].color = "blue";
-          this.possibleMoves.push(idx);
+          if(this.tileMap[idx].entity === this.player) {
+            this.player.health -= move.action.damage;
+            if (this.player.health > 0) {
+              const collisionResult = calculateCollisionResult(
+                entity.coordinate,
+                this.player.coordinate,
+              );
+              this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
+              entity.coordinate = collisionResult;
+              this.tileMap[coordinateToIndex(collisionResult, this.size)].entity = entity;
+            }
+            actionTaken = true;
+            break;
+          }
         }
-        await timeout(500);
+
+        if(!actionTaken) {
+          this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
+          entity.coordinate = closest_tile;
+          this.tileMap[coordinateToIndex(closest_tile, this.size)].entity = entity;
+        }
+
+        await timeout(400);
         this.clearPossiblemoves();
         await timeout(100);
       }
