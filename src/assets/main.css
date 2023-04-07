@@ -1,7 +1,6 @@
 @import './base.css';
 
 #app {
-  height: 100vh;
   font-weight: normal;
 }
 
@@ -25,5 +24,11 @@ a {
 
   #app {
     width: 30vw;
+  }
+}
+
+@supports (height: 100dvh) {
+  :root {
+      --unit-100vh: 100dvh;
   }
 }
