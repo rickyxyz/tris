@@ -19,6 +19,7 @@ export default {
       size: 5,
       possibleMoves: Array(),
       tileMap: Array(),
+      gridSizeBoundary: {},
     };
   },
   computed: {
@@ -47,7 +48,6 @@ export default {
       this.possibleMoves = [];
     },
     generateAction() {
-      // console.log("generate action");
       let area = calculatePossibleMoves(
         this.player.coordinate,
         this.action.direction,
@@ -73,7 +73,6 @@ export default {
       }
     },
     grid_click(tile) {
-      // console.log("grid click");
       const currentPlayerIndex = coordinateToIndex(
         this.player.coordinate,
         this.size
@@ -203,6 +202,14 @@ export default {
     this.tileMap = this.initialTileMap;
   },
   mounted() {
+    const gameAreaHeight = this.$refs.gameArea.clientHeight;
+    const gameAreaWidth = this.$refs.gameArea.clientWidth;
+    this.gridSizeBoundary = gameAreaHeight > gameAreaWidth ? {
+      width: '100%'
+    } : {
+      height: '100%'
+    }
+
     for (let entity of this.entities) {
       let idx = coordinateToIndex(entity.coordinate, this.size);
       this.tileMap[idx].entity = entity;
@@ -214,8 +221,8 @@ export default {
 </script>
 
 <template>
-  <div id="game_area">
-    <div id="game_grid">
+  <div id="game_area" ref="gameArea">
+    <div id="game_grid" :style="gridSizeBoundary">
       <div
         v-for="(tile, idx) in this.tileMap"
         :key="idx"
@@ -238,7 +245,6 @@ export default {
 
 #game_grid {
   display: grid;
-  width: 100%;
   aspect-ratio: 1/1;
   grid-template-columns: v-bind(gridStyle);
   grid-template-rows: v-bind(gridStyle);
