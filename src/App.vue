@@ -10,6 +10,7 @@ export default {
   },
   data() {
     return {
+      gameMode: "main menu",
       player: {
         name: "hero",
         type: "player",
@@ -60,6 +61,16 @@ export default {
       }
     },
   },
+  watch: {
+    player: {
+      handler(){
+        if(this.player.health <= 0) {
+          this.gameMode = "game over";
+        }
+      },
+      deep: true
+    }
+  },
   mounted() {
     // If less than most tablets, set CSS var to window height.
     let value = "100vh"
@@ -68,12 +79,24 @@ export default {
     if (window.innerWidth && window.innerWidth <= 1024) {
       value = `${window.innerHeight}px`
     }
-    document.documentElement.style.setProperty("--real100vh", value)
+    document.documentElement.style.setProperty("--real100vh", value);
+
+    this.selectedMove = Moves.neutral;
   }
 };
 </script>
 
 <template>
+  <div class="screen-background" v-if="gameMode !== 'play'">
+    <div class="screen-title" v-if="gameMode === 'main menu'">
+      <h1>TITLE</h1>
+      <h2 @click="this.gameMode = 'play'">Start</h2>
+    </div>
+    <div class="screen-gameover" v-if="gameMode === 'game over'">
+      <h1>GAME OVER</h1>
+      <h2 @click="this.gameMode = 'play'">RETRY</h2>
+    </div>
+  </div>
   <main :class="[isMobile() ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
@@ -83,12 +106,37 @@ export default {
     <GameArea :player="player" :entities="entities" :action="selectedMove.action" :isPlayerTurn="isPlayerTurn"
       @endTurn="switchTurn()"></GameArea>
     <div id="combo_bar">Combo Bar</div>
-    <MoveSet :moves="this.player.moves" @selectedMove="(move) => selectMove(move)" :class="[isMobile() ? 'rounded_moveset' : '']"></MoveSet>
+    <MoveSet :moves="this.player.moves" @selectedMove="(move) => selectMove(move)"
+      :class="[isMobile() ? 'rounded_moveset' : '']"></MoveSet>
     <div id="spacer" v-if="isMobile()"></div>
   </main>
 </template>
 
 <style scoped>
+.screen-background {
+  color: white;
+  background-color: black;
+  z-index: 2;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 30vh;
+}
+
+.screen-background > div {
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;
+}
+
+.screen-background > div > h2{
+  cursor: pointer;
+}
+
 /* CSS vars */
 :root {
   --real100vh: 100vh;
