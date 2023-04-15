@@ -119,8 +119,11 @@ export default {
       let o = 1;
 
       for (let entity of this.entities) {
+        if(entity.health <= 0) {
+          continue;
+        }
         let move = entity.moves[0];
-        let closest_tile = {x: -1, y: -1};
+        let closest_tile = { x: -1, y: -1 };
         let actionTaken = false;
 
         let area = calculatePossibleMoves(
@@ -134,20 +137,20 @@ export default {
           return !this.tileMap[coordinateToIndex(tile, this.size)].entity.name || this.tileMap[coordinateToIndex(tile, this.size)].entity === this.player;
         })
 
-        if(area.length > 0) {
+        if (area.length > 0) {
           closest_tile = area.reduce((prev, curr) => {
             let newDiff = Math.abs(this.player.coordinate.x - curr.x) + Math.abs(this.player.coordinate.y - curr.y);
             let oldDiff = Math.abs(this.player.coordinate.x - prev.x) + Math.abs(this.player.coordinate.y - prev.y);
 
-            return newDiff <= oldDiff? curr: prev;
+            return newDiff <= oldDiff ? curr : prev;
           })
         }
 
-        for(let tile of area) {
+        for (let tile of area) {
           const idx = coordinateToIndex(tile, this.size);
           this.possibleMoves.push(idx);
 
-          if(this.tileMap[idx].entity === this.player) {
+          if (this.tileMap[idx].entity === this.player) {
             this.tileMap[idx].color = "red";
           } else {
             this.tileMap[idx].color = "blue";
@@ -156,7 +159,7 @@ export default {
 
         for (let tile of area) {
           const idx = coordinateToIndex(tile, this.size);
-          if(this.tileMap[idx].entity === this.player) {
+          if (this.tileMap[idx].entity === this.player) {
             this.player.health -= move.action.damage;
             if (this.player.health > 0) {
               const collisionResult = calculateCollisionResult(
@@ -172,7 +175,7 @@ export default {
           }
         }
 
-        if(!actionTaken) {
+        if (!actionTaken) {
           this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
           entity.coordinate = closest_tile;
           this.tileMap[coordinateToIndex(closest_tile, this.size)].entity = entity;
@@ -223,13 +226,13 @@ export default {
 <template>
   <div id="game_area" ref="gameArea">
     <div id="game_grid" :style="gridSizeBoundary">
-      <div
-        v-for="(tile, idx) in this.tileMap"
-        :key="idx"
-        class="game_tile"
-        :class="[tile.color]"
-        @click="grid_click(tile)"
-      >
+      <div v-for="(tile, idx) in this.tileMap" :key="idx" class="game_tile" :class="[tile.color]"
+        @click="grid_click(tile)">
+        <div class="game_tile-health_bar">
+          <span class="game_tile-heart" v-for="health in tile.entity.health">
+            ❤️
+          </span>
+        </div>
         {{ tile.entity.sprite }}
       </div>
     </div>
@@ -251,12 +254,20 @@ export default {
 }
 
 .game_tile {
-  font-size: 1rem;
+  font-size: calc(1rem + 1vh);
   border: solid black 1px;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: white;
+  flex-direction: column;
+}
+
+.game_tile-health_bar {
+  max-width: 100%;
+  top: calc(0.7rem - 0.5vh);
+  position: absolute;
+  font-size: calc(0.5rem + 0.2vw);
 }
 
 .blue {
