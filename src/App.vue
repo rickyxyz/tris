@@ -1,7 +1,7 @@
 <script lang="ts">
 import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
-import Moves from "./Data/Moves.js";
+import Moves from "./data/Moves.js";
 
 export default {
   components: {
@@ -63,8 +63,8 @@ export default {
   },
   watch: {
     player: {
-      handler(){
-        if(this.player.health <= 0) {
+      handler() {
+        if (this.player.health <= 0) {
           this.gameMode = "game over";
         }
       },
@@ -72,10 +72,7 @@ export default {
     }
   },
   mounted() {
-    // If less than most tablets, set CSS var to window height.
     let value = "100vh"
-
-    // If window size is iPad or smaller, then use JS to set screen height.
     if (window.innerWidth && window.innerWidth <= 1024) {
       value = `${window.innerHeight}px`
     }
@@ -125,7 +122,7 @@ export default {
   padding-top: 30vh;
 }
 
-.screen-background > div {
+.screen-background>div {
   cursor: default;
   display: flex;
   flex-direction: column;
@@ -133,11 +130,10 @@ export default {
   gap: 5rem;
 }
 
-.screen-background > div > h2{
+.screen-background>div>h2 {
   cursor: pointer;
 }
 
-/* CSS vars */
 :root {
   --real100vh: 100vh;
 }
