@@ -1,7 +1,7 @@
 <script lang="ts">
 import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
-import Moves from "./data/Moves.js";
+import Moves from "./data/Attacks.js";
 
 export default {
   components: {

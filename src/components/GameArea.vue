@@ -119,7 +119,7 @@ export default {
       let o = 1;
 
       for (let entity of this.entities) {
-        if(entity.health <= 0) {
+        if (entity.health <= 0) {
           continue;
         }
         let move = entity.moves[0];
