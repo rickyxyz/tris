@@ -10,7 +10,7 @@ export default {
   props: {
     player: Object,
     entities: Array,
-    action: Object,
+    selectedMove: Number,
     isPlayerTurn: Boolean,
   },
   emits: ["endTurn"],
@@ -48,148 +48,143 @@ export default {
       this.possibleMoves = [];
     },
     generateAction() {
-      let area = calculatePossibleMoves(
-        this.player.coordinate,
-        this.action.direction,
-        this.action.range,
-        this.size
-      );
-      if (this.action.type === "move") {
-        for (let tile of area) {
-          const idx = coordinateToIndex(tile, this.size);
-          if (this.tileMap[idx].entity.type === "monster") {
-            this.tileMap[idx].color = "red";
-          } else {
-            this.tileMap[idx].color = "blue";
-          }
-          this.possibleMoves.push(idx);
+      const move = this.selectedMove === -1 ? this.player.neutral : this.player.moves[this.selectedMove];
+      const area = move.getClickableArea(this.size);
+      for (let tile of area) {
+        const idx = coordinateToIndex(tile, this.size);
+
+        let tileType = "empty";
+        switch (this.tileMap[idx].entity.type) {
+          case 'enemy':
+            tileType = 'enemy';
+            break;
+          case 'player':
+            tileType = 'self';
+            break;
         }
-      } else if (this.action.type === "collateral") {
-        for (let tile of area) {
-          const idx = coordinateToIndex(tile, this.size);
-          this.tileMap[idx].color = "red";
-          this.possibleMoves.push(idx);
-        }
+
+        this.tileMap[idx].color = move.colorMap[tileType];
+        this.possibleMoves.push(idx);
       }
     },
     grid_click(tile) {
-      const currentPlayerIndex = coordinateToIndex(
-        this.player.coordinate,
-        this.size
-      );
-      const clickedIndex = coordinateToIndex(tile.coordinate, this.size);
-      if (this.action.type === "move") {
-        if (this.possibleMoves.includes(clickedIndex)) {
-          this.tileMap[currentPlayerIndex].entity = {};
-          if (this.tileMap[clickedIndex].entity) {
-            this.tileMap[clickedIndex].entity.health -= this.action.damage;
-          }
-          if (this.tileMap[clickedIndex].entity.health > 0) {
-            const collisionResult = calculateCollisionResult(
-              this.player.coordinate,
-              tile.coordinate
-            );
-            this.tileMap[coordinateToIndex(collisionResult, this.size)].entity =
-              this.player;
-            this.player.coordinate = collisionResult;
-          } else {
-            this.tileMap[clickedIndex].entity = this.player;
-            this.player.coordinate = tile.coordinate;
-          }
-          this.clearPossiblemoves();
-          this.$emit("endTurn");
-        }
-      } else if (this.action.type === "collateral") {
-        if (this.possibleMoves.includes(clickedIndex)) {
-          this.player.health -= this.action.damage;
-          for (let tile of this.possibleMoves) {
-            if (this.tileMap[tile].entity) {
-              this.tileMap[tile].entity.health -= this.action.damage;
-            }
-            if (this.tileMap[tile].entity.health <= 0) {
-              this.tileMap[tile].entity = {};
-            }
-          }
-          this.clearPossiblemoves();
-          this.$emit("endTurn");
-        }
-      }
+      // const currentPlayerIndex = coordinateToIndex(
+      //   this.player.coordinate,
+      //   this.size
+      // );
+      // const clickedIndex = coordinateToIndex(tile.coordinate, this.size);
+      // if (this.action.type === "move") {
+      //   if (this.possibleMoves.includes(clickedIndex)) {
+      //     this.tileMap[currentPlayerIndex].entity = {};
+      //     if (this.tileMap[clickedIndex].entity) {
+      //       this.tileMap[clickedIndex].entity.health -= this.action.damage;
+      //     }
+      //     if (this.tileMap[clickedIndex].entity.health > 0) {
+      //       const collisionResult = calculateCollisionResult(
+      //         this.player.coordinate,
+      //         tile.coordinate
+      //       );
+      //       this.tileMap[coordinateToIndex(collisionResult, this.size)].entity =
+      //         this.player;
+      //       this.player.coordinate = collisionResult;
+      //     } else {
+      //       this.tileMap[clickedIndex].entity = this.player;
+      //       this.player.coordinate = tile.coordinate;
+      //     }
+      //     this.clearPossiblemoves();
+      //     this.$emit("endTurn");
+      //   }
+      // } else if (this.action.type === "collateral") {
+      //   if (this.possibleMoves.includes(clickedIndex)) {
+      //     this.player.health -= this.action.damage;
+      //     for (let tile of this.possibleMoves) {
+      //       if (this.tileMap[tile].entity) {
+      //         this.tileMap[tile].entity.health -= this.action.damage;
+      //       }
+      //       if (this.tileMap[tile].entity.health <= 0) {
+      //         this.tileMap[tile].entity = {};
+      //       }
+      //     }
+      //     this.clearPossiblemoves();
+      //     this.$emit("endTurn");
+      //   }
+      // }
     },
     async enemyTurn() {
-      let o = 1;
+      // let o = 1;
 
-      for (let entity of this.entities) {
-        if (entity.health <= 0) {
-          continue;
-        }
-        let move = entity.moves[0];
-        let closest_tile = { x: -1, y: -1 };
-        let actionTaken = false;
+      // for (let entity of this.entities) {
+      //   if (entity.health <= 0) {
+      //     continue;
+      //   }
+      //   let move = entity.moves[0];
+      //   let closest_tile = { x: -1, y: -1 };
+      //   let actionTaken = false;
 
-        let area = calculatePossibleMoves(
-          entity.coordinate,
-          move.action.direction,
-          move.action.range,
-          this.size
-        );
+      //   let area = calculatePossibleMoves(
+      //     entity.coordinate,
+      //     move.action.direction,
+      //     move.action.range,
+      //     this.size
+      //   );
 
-        area = area.filter((tile) => {
-          return !this.tileMap[coordinateToIndex(tile, this.size)].entity.name || this.tileMap[coordinateToIndex(tile, this.size)].entity === this.player;
-        })
+      //   area = area.filter((tile) => {
+      //     return !this.tileMap[coordinateToIndex(tile, this.size)].entity.name || this.tileMap[coordinateToIndex(tile, this.size)].entity === this.player;
+      //   })
 
-        if (area.length > 0) {
-          closest_tile = area.reduce((prev, curr) => {
-            let newDiff = Math.abs(this.player.coordinate.x - curr.x) + Math.abs(this.player.coordinate.y - curr.y);
-            let oldDiff = Math.abs(this.player.coordinate.x - prev.x) + Math.abs(this.player.coordinate.y - prev.y);
+      //   if (area.length > 0) {
+      //     closest_tile = area.reduce((prev, curr) => {
+      //       let newDiff = Math.abs(this.player.coordinate.x - curr.x) + Math.abs(this.player.coordinate.y - curr.y);
+      //       let oldDiff = Math.abs(this.player.coordinate.x - prev.x) + Math.abs(this.player.coordinate.y - prev.y);
 
-            return newDiff <= oldDiff ? curr : prev;
-          })
-        }
+      //       return newDiff <= oldDiff ? curr : prev;
+      //     })
+      //   }
 
-        for (let tile of area) {
-          const idx = coordinateToIndex(tile, this.size);
-          this.possibleMoves.push(idx);
+      //   for (let tile of area) {
+      //     const idx = coordinateToIndex(tile, this.size);
+      //     this.possibleMoves.push(idx);
 
-          if (this.tileMap[idx].entity === this.player) {
-            this.tileMap[idx].color = "red";
-          } else {
-            this.tileMap[idx].color = "blue";
-          }
-        }
+      //     if (this.tileMap[idx].entity === this.player) {
+      //       this.tileMap[idx].color = "red";
+      //     } else {
+      //       this.tileMap[idx].color = "blue";
+      //     }
+      //   }
 
-        for (let tile of area) {
-          const idx = coordinateToIndex(tile, this.size);
-          if (this.tileMap[idx].entity === this.player) {
-            this.player.health -= move.action.damage;
-            if (this.player.health > 0) {
-              const collisionResult = calculateCollisionResult(
-                entity.coordinate,
-                this.player.coordinate,
-              );
-              this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
-              entity.coordinate = collisionResult;
-              this.tileMap[coordinateToIndex(collisionResult, this.size)].entity = entity;
-            }
-            actionTaken = true;
-            break;
-          }
-        }
+      //   for (let tile of area) {
+      //     const idx = coordinateToIndex(tile, this.size);
+      //     if (this.tileMap[idx].entity === this.player) {
+      //       this.player.health -= move.action.damage;
+      //       if (this.player.health > 0) {
+      //         const collisionResult = calculateCollisionResult(
+      //           entity.coordinate,
+      //           this.player.coordinate,
+      //         );
+      //         this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
+      //         entity.coordinate = collisionResult;
+      //         this.tileMap[coordinateToIndex(collisionResult, this.size)].entity = entity;
+      //       }
+      //       actionTaken = true;
+      //       break;
+      //     }
+      //   }
 
-        if (!actionTaken) {
-          this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
-          entity.coordinate = closest_tile;
-          this.tileMap[coordinateToIndex(closest_tile, this.size)].entity = entity;
-        }
+      //   if (!actionTaken) {
+      //     this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
+      //     entity.coordinate = closest_tile;
+      //     this.tileMap[coordinateToIndex(closest_tile, this.size)].entity = entity;
+      //   }
 
-        await timeout(400);
-        this.clearPossiblemoves();
-        await timeout(100);
-      }
-      this.$emit("endTurn");
+      //   await timeout(400);
+      //   this.clearPossiblemoves();
+      //   await timeout(100);
+      // }
+      // this.$emit("endTurn");
     },
   },
   watch: {
-    action() {
+    selectedMove() {
       if (this.isPlayerTurn) {
         this.clearPossiblemoves();
         this.generateAction();

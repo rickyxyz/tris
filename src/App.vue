@@ -1,7 +1,9 @@
 <script lang="ts">
 import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
-import Moves from "./data/Attacks.js";
+import Attack from "./data/Attack.js";
+import Entity from "./classes/Entity";
+import Enemy from "./data/Enemy.js";
 
 export default {
   components: {
@@ -10,34 +12,21 @@ export default {
   },
   data() {
     return {
-      gameMode: "main menu",
-      player: {
+      // gameMode: "main menu",
+      gameMode: "play",
+      player: Entity({
         name: "hero",
         type: "player",
         coordinate: { x: 3, y: 3 },
         sprite: "👑",
         health: 3,
-        moves: [Moves.rush, Moves.slice, Moves.explode],
-      },
+        moves: [Attack.rush, Attack.slice, Attack.explode],
+      }),
       entities: [
-        {
-          name: "t-rex",
-          type: "monster",
-          coordinate: { x: 4, y: 4 },
-          sprite: "🦖",
-          health: 1,
-          moves: [Moves.rush]
-        },
-        {
-          name: "sauropod",
-          type: "monster",
-          coordinate: { x: 3, y: 5 },
-          sprite: "🦕",
-          health: 2,
-          moves: [Moves.slice]
-        },
+        Entity({ ...Enemy.sauropod, coordinate: { x: 3, y: 5 } }),
+        Entity({ ...Enemy.t_rex, coordinate: { x: 4, y: 4 } }),
       ],
-      selectedMove: {} as any,
+      selectedMoveIndex: -1,
       isPlayerTurn: true,
     };
   },
@@ -50,15 +39,10 @@ export default {
       this.selectMove(-1);
     },
     selectMove(move) {
-      if (move >= 0) {
-        if (this.selectedMove === this.player.moves[move]) {
-          this.selectedMove = Moves.neutral;
-        } else {
-          this.selectedMove = this.player.moves[move];
-        }
-      } else {
-        this.selectedMove = Moves.neutral;
+      if (move === this.selectedMoveIndex) {
+        move = -1;
       }
+      this.selectedMoveIndex = move;
     },
   },
   watch: {
@@ -78,7 +62,7 @@ export default {
     }
     document.documentElement.style.setProperty("--real100vh", value);
 
-    this.selectedMove = Moves.neutral;
+    this.selectedMove = Attack.neutral;
   }
 };
 </script>
@@ -100,7 +84,7 @@ export default {
       Status Bar | HP: {{ this.player.health }} |
       {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
     </div>
-    <GameArea :player="player" :entities="entities" :action="selectedMove.action" :isPlayerTurn="isPlayerTurn"
+    <GameArea :player="player" :entities="entities" :selectedMove="selectedMoveIndex" :isPlayerTurn="isPlayerTurn"
       @endTurn="switchTurn()"></GameArea>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet :moves="this.player.moves" @selectedMove="(move) => selectMove(move)"

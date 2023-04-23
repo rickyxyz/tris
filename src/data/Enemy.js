@@ -1,16 +1,18 @@
+import Attack from "./Attack.js";
+
 export default {
   sauropod: {
     name: "Sauropod",
-    type: "monster",
+    type: "enemy",
     sprite: "🦕",
     health: 2,
-    moves: [Moves.slice],
+    moves: [Attack.slice],
   },
   t_rex: {
     name: "T-rex",
-    type: "monster",
+    type: "enemy",
     sprite: "🦖",
     health: 1,
-    moves: [Moves.rush],
+    moves: [Attack.rush],
   },
 };
