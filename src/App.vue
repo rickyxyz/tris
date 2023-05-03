@@ -32,10 +32,12 @@ export default {
   },
   methods: {
     isMobile() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
     },
     switchTurn() {
-      this.isPlayerTurn = !this.isPlayerTurn;
+      // this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
     },
     selectMove(move) {
@@ -52,18 +54,18 @@ export default {
           this.gameMode = "game over";
         }
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   mounted() {
-    let value = "100vh"
+    let value = "100vh";
     if (window.innerWidth && window.innerWidth <= 1024) {
-      value = `${window.innerHeight}px`
+      value = `${window.innerHeight}px`;
     }
     document.documentElement.style.setProperty("--real100vh", value);
 
     this.selectedMove = Attack.neutral;
-  }
+  },
 };
 </script>
 
@@ -84,11 +86,19 @@ export default {
       Status Bar | HP: {{ this.player.health }} |
       {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
     </div>
-    <GameArea :player="player" :entities="entities" :selectedMove="selectedMoveIndex" :isPlayerTurn="isPlayerTurn"
-      @endTurn="switchTurn()"></GameArea>
+    <GameArea
+      :player="player"
+      :entities="entities"
+      :selectedMove="selectedMoveIndex"
+      :isPlayerTurn="isPlayerTurn"
+      @endTurn="switchTurn()"
+    ></GameArea>
     <div id="combo_bar">Combo Bar</div>
-    <MoveSet :moves="this.player.moves" @selectedMove="(move) => selectMove(move)"
-      :class="[isMobile() ? 'rounded_moveset' : '']"></MoveSet>
+    <MoveSet
+      :moves="this.player.moves"
+      @selectedMove="(move) => selectMove(move)"
+      :class="[isMobile() ? 'rounded_moveset' : '']"
+    ></MoveSet>
     <div id="spacer" v-if="isMobile()"></div>
   </main>
 </template>
@@ -106,7 +116,7 @@ export default {
   padding-top: 30vh;
 }
 
-.screen-background>div {
+.screen-background > div {
   cursor: default;
   display: flex;
   flex-direction: column;
@@ -114,7 +124,7 @@ export default {
   gap: 5rem;
 }
 
-.screen-background>div>h2 {
+.screen-background > div > h2 {
   cursor: pointer;
 }
 
@@ -166,5 +176,6 @@ main {
     "move_set";
 }
 
-@media (min-width: 1024px) {}
+@media (min-width: 1024px) {
+}
 </style>
