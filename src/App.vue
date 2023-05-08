@@ -37,7 +37,7 @@ export default {
       );
     },
     switchTurn() {
-      // this.isPlayerTurn = !this.isPlayerTurn;
+      this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
     },
     selectMove(move) {
