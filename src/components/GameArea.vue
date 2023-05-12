@@ -1,10 +1,5 @@
 <script lang="ts">
-import {
-  calculatePossibleMoves,
-  coordinateToIndex,
-  calculateCollisionResult,
-  timeout,
-} from "../utils/Utils";
+import { coordinateToIndex, timeout } from "../utils/Utils";
 import { ref } from "vue";
 
 export default {
@@ -20,7 +15,7 @@ export default {
       size: 5,
       possibleMoves: Array(),
       tileMap: Array(),
-      gridSizeBoundary: {},
+      isGridHeightBound: true,
     };
   },
   computed: {
@@ -42,6 +37,13 @@ export default {
     },
   },
   methods: {
+    calculategridSizeBoundary() {
+      this.isGridHeightBound =
+        (window.innerHeight >= window.innerWidth &&
+          Math.abs(window.innerHeight - window.innerWidth) < 400) ||
+        (window.innerHeight < window.innerWidth &&
+          Math.abs(window.innerHeight - window.innerWidth) < 20);
+    },
     clearPossiblemoves() {
       for (let tile of this.possibleMoves) {
         this.tileMap[tile].color = "white";
@@ -163,18 +165,11 @@ export default {
   beforeMount() {
     this.tileMap = this.initialTileMap;
   },
+  created() {
+    window.addEventListener("resize", this.calculategridSizeBoundary);
+  },
   mounted() {
-    const gameAreaHeight = this.$refs.gameArea.clientHeight;
-    const gameAreaWidth = this.$refs.gameArea.clientWidth;
-    this.gridSizeBoundary =
-      gameAreaHeight > gameAreaWidth
-        ? {
-            width: "100%",
-          }
-        : {
-            height: "100%",
-          };
-
+    this.calculategridSizeBoundary();
     for (let entity of this.entities) {
       let idx = coordinateToIndex(entity.coordinate, this.size);
       this.tileMap[idx].entity = entity;
@@ -182,12 +177,18 @@ export default {
     const idx = coordinateToIndex(this.player.coordinate, this.size);
     this.tileMap[idx].entity = this.player;
   },
+  destroyed() {
+    window.removeEventListener("resize", this.calculategridSizeBoundary);
+  },
 };
 </script>
 
 <template>
   <div id="game_area" ref="gameArea">
-    <div id="game_grid" :style="gridSizeBoundary">
+    <div
+      id="game_grid"
+      :style="[this.isGridHeightBound ? { height: '100%' } : { width: '100%' }]"
+    >
       <div
         v-for="(tile, idx) in this.tileMap"
         :key="idx"

@@ -12,6 +12,7 @@ export default {
   },
   data() {
     return {
+      isMobile: false,
       // gameMode: "main menu",
       gameMode: "play",
       player: Entity({
@@ -31,10 +32,19 @@ export default {
     };
   },
   methods: {
-    isMobile() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
+    determineDeviceType() {
+      let value = "100vh";
+      if (window.innerWidth && window.innerWidth <= 1100) {
+        value = `${window.innerHeight}px`;
+      }
+      document.documentElement.style.setProperty("--real100vh", value);
+
+      this.isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        ) ||
+        (window.innerHeight > window.innerWidth &&
+          Math.abs(window.innerHeight - window.innerWidth) > 300);
     },
     switchTurn() {
       this.isPlayerTurn = !this.isPlayerTurn;
@@ -57,14 +67,15 @@ export default {
       deep: true,
     },
   },
+  created() {
+    window.addEventListener("resize", this.determineDeviceType);
+  },
   mounted() {
-    let value = "100vh";
-    if (window.innerWidth && window.innerWidth <= 1024) {
-      value = `${window.innerHeight}px`;
-    }
-    document.documentElement.style.setProperty("--real100vh", value);
-
+    this.determineDeviceType();
     this.selectedMove = Attack.neutral;
+  },
+  destroyed() {
+    window.removeEventListener("resize", this.determineDeviceType);
   },
 };
 </script>
@@ -80,13 +91,14 @@ export default {
       <h2 @click="this.gameMode = 'play'">RETRY</h2>
     </div>
   </div>
-  <main :class="[isMobile() ? 'mobile_layout' : 'desktop_layout']">
+  <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
       Status Bar | HP: {{ this.player.health }} |
       {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
     </div>
     <GameArea
+      :isMobile="isMobile"
       :player="player"
       :entities="entities"
       :selectedMove="selectedMoveIndex"
@@ -97,9 +109,9 @@ export default {
     <MoveSet
       :moves="this.player.moves"
       @selectedMove="(move) => selectMove(move)"
-      :class="[isMobile() ? 'rounded_moveset' : '']"
+      :class="[isMobile ? 'rounded_moveset' : '']"
     ></MoveSet>
-    <div id="spacer" v-if="isMobile()"></div>
+    <div id="spacer" v-if="isMobile"></div>
   </main>
 </template>
 
