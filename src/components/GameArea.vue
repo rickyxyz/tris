@@ -40,7 +40,7 @@ export default {
     calculategridSizeBoundary() {
       this.isGridHeightBound =
         (window.innerHeight >= window.innerWidth &&
-          Math.abs(window.innerHeight - window.innerWidth) < 400) ||
+          Math.abs(window.innerHeight - window.innerWidth) < 300) ||
         (window.innerHeight < window.innerWidth &&
           Math.abs(window.innerHeight - window.innerWidth) < 20);
     },
