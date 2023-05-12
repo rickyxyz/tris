@@ -1,7 +1,9 @@
 <script lang="ts">
 import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
-import Moves from "./data/Moves.js";
+import Attack from "./data/Attack.js";
+import Entity from "./classes/Entity";
+import Enemy from "./data/Enemy.js";
 
 export default {
   components: {
@@ -10,55 +12,49 @@ export default {
   },
   data() {
     return {
-      gameMode: "main menu",
-      player: {
+      isMobile: false,
+      // gameMode: "main menu",
+      gameMode: "play",
+      player: Entity({
         name: "hero",
         type: "player",
         coordinate: { x: 3, y: 3 },
         sprite: "👑",
         health: 3,
-        moves: [Moves.rush, Moves.slice, Moves.explode],
-      },
+        moves: [Attack.rush, Attack.slice, Attack.explode],
+      }),
       entities: [
-        {
-          name: "t-rex",
-          type: "monster",
-          coordinate: { x: 4, y: 4 },
-          sprite: "🦖",
-          health: 1,
-          moves: [Moves.rush]
-        },
-        {
-          name: "sauropod",
-          type: "monster",
-          coordinate: { x: 3, y: 5 },
-          sprite: "🦕",
-          health: 2,
-          moves: [Moves.slice]
-        },
+        Entity({ ...Enemy.sauropod, coordinate: { x: 3, y: 5 } }),
+        Entity({ ...Enemy.t_rex, coordinate: { x: 4, y: 4 } }),
       ],
-      selectedMove: {} as any,
+      selectedMoveIndex: -1,
       isPlayerTurn: true,
     };
   },
   methods: {
-    isMobile() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    determineDeviceType() {
+      let value = "100vh";
+      if (window.innerWidth && window.innerWidth <= 1100) {
+        value = `${window.innerHeight}px`;
+      }
+      document.documentElement.style.setProperty("--real100vh", value);
+
+      this.isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        ) ||
+        (window.innerHeight > window.innerWidth &&
+          Math.abs(window.innerHeight - window.innerWidth) > 300);
     },
     switchTurn() {
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
     },
     selectMove(move) {
-      if (move >= 0) {
-        if (this.selectedMove === this.player.moves[move]) {
-          this.selectedMove = Moves.neutral;
-        } else {
-          this.selectedMove = this.player.moves[move];
-        }
-      } else {
-        this.selectedMove = Moves.neutral;
+      if (move === this.selectedMoveIndex) {
+        move = -1;
       }
+      this.selectedMoveIndex = move;
     },
   },
   watch: {
@@ -68,18 +64,19 @@ export default {
           this.gameMode = "game over";
         }
       },
-      deep: true
-    }
+      deep: true,
+    },
+  },
+  created() {
+    window.addEventListener("resize", this.determineDeviceType);
   },
   mounted() {
-    let value = "100vh"
-    if (window.innerWidth && window.innerWidth <= 1024) {
-      value = `${window.innerHeight}px`
-    }
-    document.documentElement.style.setProperty("--real100vh", value);
-
-    this.selectedMove = Moves.neutral;
-  }
+    this.determineDeviceType();
+    this.selectedMove = Attack.neutral;
+  },
+  destroyed() {
+    window.removeEventListener("resize", this.determineDeviceType);
+  },
 };
 </script>
 
@@ -94,18 +91,27 @@ export default {
       <h2 @click="this.gameMode = 'play'">RETRY</h2>
     </div>
   </div>
-  <main :class="[isMobile() ? 'mobile_layout' : 'desktop_layout']">
+  <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
       Status Bar | HP: {{ this.player.health }} |
       {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
     </div>
-    <GameArea :player="player" :entities="entities" :action="selectedMove.action" :isPlayerTurn="isPlayerTurn"
-      @endTurn="switchTurn()"></GameArea>
+    <GameArea
+      :isMobile="isMobile"
+      :player="player"
+      :entities="entities"
+      :selectedMove="selectedMoveIndex"
+      :isPlayerTurn="isPlayerTurn"
+      @endTurn="switchTurn()"
+    ></GameArea>
     <div id="combo_bar">Combo Bar</div>
-    <MoveSet :moves="this.player.moves" @selectedMove="(move) => selectMove(move)"
-      :class="[isMobile() ? 'rounded_moveset' : '']"></MoveSet>
-    <div id="spacer" v-if="isMobile()"></div>
+    <MoveSet
+      :moves="this.player.moves"
+      @selectedMove="(move) => selectMove(move)"
+      :class="[isMobile ? 'rounded_moveset' : '']"
+    ></MoveSet>
+    <div id="spacer" v-if="isMobile"></div>
   </main>
 </template>
 
@@ -122,7 +128,7 @@ export default {
   padding-top: 30vh;
 }
 
-.screen-background>div {
+.screen-background > div {
   cursor: default;
   display: flex;
   flex-direction: column;
@@ -130,7 +136,7 @@ export default {
   gap: 5rem;
 }
 
-.screen-background>div>h2 {
+.screen-background > div > h2 {
   cursor: pointer;
 }
 
@@ -182,5 +188,6 @@ main {
     "move_set";
 }
 
-@media (min-width: 1024px) {}
+@media (min-width: 1024px) {
+}
 </style>

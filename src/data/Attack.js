@@ -11,7 +11,7 @@ export default {
   rush: {
     name: "rush",
     action: {
-      type: "move",
+      type: "attack",
       direction: "plus",
       range: 2,
       damage: 1,
@@ -20,7 +20,7 @@ export default {
   slice: {
     name: "slice",
     action: {
-      type: "move",
+      type: "attack",
       direction: "cross",
       range: 2,
       damage: 1,

@@ -1,16 +1,12 @@
 <script lang="ts">
-import {
-  calculatePossibleMoves,
-  coordinateToIndex,
-  calculateCollisionResult,
-  timeout,
-} from "../utils/Utils";
+import { coordinateToIndex, timeout } from "../utils/Utils";
+import { ref } from "vue";
 
 export default {
   props: {
     player: Object,
     entities: Array,
-    action: Object,
+    selectedMove: Number,
     isPlayerTurn: Boolean,
   },
   emits: ["endTurn"],
@@ -19,7 +15,7 @@ export default {
       size: 5,
       possibleMoves: Array(),
       tileMap: Array(),
-      gridSizeBoundary: {},
+      isGridHeightBound: true,
     };
   },
   computed: {
@@ -41,6 +37,13 @@ export default {
     },
   },
   methods: {
+    calculategridSizeBoundary() {
+      this.isGridHeightBound =
+        (window.innerHeight >= window.innerWidth &&
+          Math.abs(window.innerHeight - window.innerWidth) < 400) ||
+        (window.innerHeight < window.innerWidth &&
+          Math.abs(window.innerHeight - window.innerWidth) < 20);
+    },
     clearPossiblemoves() {
       for (let tile of this.possibleMoves) {
         this.tileMap[tile].color = "white";
@@ -48,140 +51,98 @@ export default {
       this.possibleMoves = [];
     },
     generateAction() {
-      let area = calculatePossibleMoves(
-        this.player.coordinate,
-        this.action.direction,
-        this.action.range,
-        this.size
-      );
-      if (this.action.type === "move") {
-        for (let tile of area) {
-          const idx = coordinateToIndex(tile, this.size);
-          if (this.tileMap[idx].entity.type === "monster") {
-            this.tileMap[idx].color = "red";
-          } else {
-            this.tileMap[idx].color = "blue";
-          }
-          this.possibleMoves.push(idx);
+      const move =
+        this.selectedMove === -1
+          ? this.player.neutral
+          : this.player.moves[this.selectedMove];
+      const area = move.getClickableArea(this.player, this.size);
+      for (let tile of area) {
+        const idx = coordinateToIndex(tile, this.size);
+
+        let tileType = "empty";
+        switch (this.tileMap[idx].entity.type) {
+          case "enemy":
+            tileType = "enemy";
+            break;
+          case "player":
+            tileType = "self";
+            break;
         }
-      } else if (this.action.type === "collateral") {
-        for (let tile of area) {
-          const idx = coordinateToIndex(tile, this.size);
-          this.tileMap[idx].color = "red";
-          this.possibleMoves.push(idx);
-        }
+
+        this.tileMap[idx].color = move.colorMap[tileType];
+        this.possibleMoves.push(idx);
       }
     },
     grid_click(tile) {
-      const currentPlayerIndex = coordinateToIndex(
-        this.player.coordinate,
-        this.size
-      );
       const clickedIndex = coordinateToIndex(tile.coordinate, this.size);
-      if (this.action.type === "move") {
-        if (this.possibleMoves.includes(clickedIndex)) {
-          this.tileMap[currentPlayerIndex].entity = {};
-          if (this.tileMap[clickedIndex].entity) {
-            this.tileMap[clickedIndex].entity.health -= this.action.damage;
-          }
-          if (this.tileMap[clickedIndex].entity.health > 0) {
-            const collisionResult = calculateCollisionResult(
-              this.player.coordinate,
-              tile.coordinate
-            );
-            this.tileMap[coordinateToIndex(collisionResult, this.size)].entity =
-              this.player;
-            this.player.coordinate = collisionResult;
-          } else {
-            this.tileMap[clickedIndex].entity = this.player;
-            this.player.coordinate = tile.coordinate;
-          }
-          this.clearPossiblemoves();
-          this.$emit("endTurn");
+      if (this.possibleMoves.includes(clickedIndex)) {
+        this.tileMap[
+          coordinateToIndex(this.player.coordinate, this.size)
+        ].entity = {};
+        const { userUpdate, targetTileUpdate } = this.player.moves[
+          this.selectedMove
+        ].onClick(this.player, tile);
+        if (targetTileUpdate) {
+          tile.entity.health = targetTileUpdate.entity.health;
+        } else {
+          tile.entity = {};
         }
-      } else if (this.action.type === "collateral") {
-        if (this.possibleMoves.includes(clickedIndex)) {
-          this.player.health -= this.action.damage;
-          for (let tile of this.possibleMoves) {
-            if (this.tileMap[tile].entity) {
-              this.tileMap[tile].entity.health -= this.action.damage;
-            }
-            if (this.tileMap[tile].entity.health <= 0) {
-              this.tileMap[tile].entity = {};
-            }
-          }
-          this.clearPossiblemoves();
-          this.$emit("endTurn");
-        }
+        this.player.coordinate = userUpdate.coordinate;
+        this.tileMap[
+          coordinateToIndex(this.player.coordinate, this.size)
+        ].entity = this.player;
+        this.clearPossiblemoves();
+        this.$emit("endTurn");
       }
     },
     async enemyTurn() {
-      let o = 1;
-
-      for (let entity of this.entities) {
-        if(entity.health <= 0) {
+      for (const entity of this.entities) {
+        if (entity.health <= 0) {
           continue;
         }
-        let move = entity.moves[0];
+        const move = entity.moves[0];
+        const area = move.getClickableArea(entity, this.size);
+        const currentTile =
+          this.tileMap[coordinateToIndex(entity.coordinate, this.size)];
         let closest_tile = { x: -1, y: -1 };
-        let actionTaken = false;
-
-        let area = calculatePossibleMoves(
-          entity.coordinate,
-          move.action.direction,
-          move.action.range,
-          this.size
-        );
-
-        area = area.filter((tile) => {
-          return !this.tileMap[coordinateToIndex(tile, this.size)].entity.name || this.tileMap[coordinateToIndex(tile, this.size)].entity === this.player;
-        })
-
         if (area.length > 0) {
           closest_tile = area.reduce((prev, curr) => {
-            let newDiff = Math.abs(this.player.coordinate.x - curr.x) + Math.abs(this.player.coordinate.y - curr.y);
-            let oldDiff = Math.abs(this.player.coordinate.x - prev.x) + Math.abs(this.player.coordinate.y - prev.y);
-
+            let newDiff =
+              Math.abs(this.player.coordinate.x - curr.x) +
+              Math.abs(this.player.coordinate.y - curr.y);
+            let oldDiff =
+              Math.abs(this.player.coordinate.x - prev.x) +
+              Math.abs(this.player.coordinate.y - prev.y);
             return newDiff <= oldDiff ? curr : prev;
-          })
+          });
         }
-
+        let nextMove = closest_tile;
         for (let tile of area) {
           const idx = coordinateToIndex(tile, this.size);
           this.possibleMoves.push(idx);
-
           if (this.tileMap[idx].entity === this.player) {
             this.tileMap[idx].color = "red";
+            nextMove = tile;
           } else {
             this.tileMap[idx].color = "blue";
           }
         }
-
-        for (let tile of area) {
-          const idx = coordinateToIndex(tile, this.size);
-          if (this.tileMap[idx].entity === this.player) {
-            this.player.health -= move.action.damage;
-            if (this.player.health > 0) {
-              const collisionResult = calculateCollisionResult(
-                entity.coordinate,
-                this.player.coordinate,
-              );
-              this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
-              entity.coordinate = collisionResult;
-              this.tileMap[coordinateToIndex(collisionResult, this.size)].entity = entity;
-            }
-            actionTaken = true;
-            break;
-          }
-        }
-
-        if (!actionTaken) {
-          this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity = {};
-          entity.coordinate = closest_tile;
-          this.tileMap[coordinateToIndex(closest_tile, this.size)].entity = entity;
-        }
-
         await timeout(400);
+        this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity =
+          {};
+        const { userUpdate, targetTileUpdate } = move.onClick(
+          entity,
+          this.tileMap[coordinateToIndex(nextMove, this.size)]
+        );
+        if (targetTileUpdate) {
+          this.tileMap[coordinateToIndex(nextMove, this.size)].entity.health =
+            targetTileUpdate.entity.health;
+        } else {
+          this.tileMap[coordinateToIndex(nextMove, this.size)].entity = {};
+        }
+        entity.coordinate = userUpdate.coordinate;
+        this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity =
+          entity;
         this.clearPossiblemoves();
         await timeout(100);
       }
@@ -189,7 +150,7 @@ export default {
     },
   },
   watch: {
-    action() {
+    selectedMove() {
       if (this.isPlayerTurn) {
         this.clearPossiblemoves();
         this.generateAction();
@@ -204,15 +165,11 @@ export default {
   beforeMount() {
     this.tileMap = this.initialTileMap;
   },
+  created() {
+    window.addEventListener("resize", this.calculategridSizeBoundary);
+  },
   mounted() {
-    const gameAreaHeight = this.$refs.gameArea.clientHeight;
-    const gameAreaWidth = this.$refs.gameArea.clientWidth;
-    this.gridSizeBoundary = gameAreaHeight > gameAreaWidth ? {
-      width: '100%'
-    } : {
-      height: '100%'
-    }
-
+    this.calculategridSizeBoundary();
     for (let entity of this.entities) {
       let idx = coordinateToIndex(entity.coordinate, this.size);
       this.tileMap[idx].entity = entity;
@@ -220,14 +177,25 @@ export default {
     const idx = coordinateToIndex(this.player.coordinate, this.size);
     this.tileMap[idx].entity = this.player;
   },
+  destroyed() {
+    window.removeEventListener("resize", this.calculategridSizeBoundary);
+  },
 };
 </script>
 
 <template>
   <div id="game_area" ref="gameArea">
-    <div id="game_grid" :style="gridSizeBoundary">
-      <div v-for="(tile, idx) in this.tileMap" :key="idx" class="game_tile" :class="[tile.color]"
-        @click="grid_click(tile)">
+    <div
+      id="game_grid"
+      :style="[this.isGridHeightBound ? { height: '100%' } : { width: '100%' }]"
+    >
+      <div
+        v-for="(tile, idx) in this.tileMap"
+        :key="idx"
+        class="game_tile"
+        :class="[tile.color]"
+        @click="grid_click(tile)"
+      >
         <div class="game_tile-health_bar">
           <span class="game_tile-heart" v-for="health in tile.entity.health">
             ❤️
