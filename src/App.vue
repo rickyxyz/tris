@@ -2,7 +2,7 @@
 import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
 import Attack from "./data/Attack.js";
-import Entity from "./classes/Entity";
+import { Entity, makeEntitiesObject } from "./classes/Entity";
 import Enemy from "./data/Enemy.js";
 
 export default {
@@ -15,21 +15,26 @@ export default {
       isMobile: false,
       // gameMode: "main menu",
       gameMode: "play",
-      player: Entity({
-        name: "hero",
-        type: "player",
-        coordinate: { x: 3, y: 3 },
-        sprite: "👑",
-        health: 3,
-        moves: [Attack.rush, Attack.slice, Attack.explode],
-      }),
-      entities: [
+      entities: makeEntitiesObject([
+        Entity({
+          name: "hero",
+          type: "player",
+          coordinate: { x: 3, y: 3 },
+          sprite: "👑",
+          health: 3,
+          moves: [Attack.rush, Attack.slice, Attack.explode],
+        }),
         Entity({ ...Enemy.sauropod, coordinate: { x: 3, y: 5 } }),
         Entity({ ...Enemy.t_rex, coordinate: { x: 4, y: 4 } }),
-      ],
+      ]),
       selectedMoveIndex: -1,
       isPlayerTurn: true,
     };
+  },
+  computed: {
+    player() {
+      return this.entities.player;
+    },
   },
   methods: {
     determineDeviceType() {
@@ -55,6 +60,10 @@ export default {
         move = -1;
       }
       this.selectedMoveIndex = move;
+    },
+    updateEntities(entitiesUpdate) {
+      console.log(entitiesUpdate);
+      this.entities = entitiesUpdate;
     },
   },
   watch: {
@@ -99,11 +108,11 @@ export default {
     </div>
     <GameArea
       :isMobile="isMobile"
-      :player="player"
       :entities="entities"
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
       @endTurn="switchTurn()"
+      @entitiesUpdate="(update) => updateEntities(update)"
     ></GameArea>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet

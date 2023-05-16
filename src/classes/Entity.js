@@ -1,5 +1,9 @@
 import Move from "./Move";
-export default function ({ name, type, sprite, health, moves, coordinate }) {
+
+let entityID = -1;
+
+export function Entity({ name, type, sprite, health, moves, coordinate }) {
+  entityID++;
   const maxHealth = health;
   const neutral = Move({
     name: "neutral",
@@ -9,6 +13,7 @@ export default function ({ name, type, sprite, health, moves, coordinate }) {
     health = maxHealth;
   }
   return {
+    entityID: type === "player" ? "player" : entityID,
     name,
     health,
     type,
@@ -18,4 +23,11 @@ export default function ({ name, type, sprite, health, moves, coordinate }) {
     neutral,
     reset,
   };
+}
+
+export function makeEntitiesObject(entities) {
+  return entities.reduce((accum, curr) => {
+    accum[curr.entityID] = curr;
+    return accum;
+  }, {});
 }
