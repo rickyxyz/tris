@@ -1,15 +1,13 @@
 <script lang="ts">
 import { coordinateToIndex, timeout } from "../utils/Utils";
-import { ref } from "vue";
 
 export default {
   props: {
-    player: Object,
-    entities: Array,
+    entities: Object,
     selectedMove: Number,
     isPlayerTurn: Boolean,
   },
-  emits: ["endTurn"],
+  emits: ["endTurn", "entitiesUpdate"],
   data() {
     return {
       size: 5,
@@ -19,6 +17,9 @@ export default {
     };
   },
   computed: {
+    player() {
+      return this.entities.player;
+    },
     initialTileMap() {
       let tiles = {};
       for (let y = this.size; y > 0; y--) {
@@ -73,37 +74,36 @@ export default {
         this.possibleMoves.push(idx);
       }
     },
+    updateParentEntities() {
+      for (const index in this.tileMap) {
+        const entity = this.tileMap[index].entity;
+        if (Object.keys(entity).length !== 0 || entity.constructor !== Object) {
+          this.entities[entity.entityID] = entity;
+        }
+      }
+    },
     grid_click(tile) {
       const clickedIndex = coordinateToIndex(tile.coordinate, this.size);
       if (this.possibleMoves.includes(clickedIndex)) {
-        this.tileMap[
-          coordinateToIndex(this.player.coordinate, this.size)
-        ].entity = {};
-        const { userUpdate, targetTileUpdate } = this.player.moves[
-          this.selectedMove
-        ].onClick(this.player, tile);
-        if (targetTileUpdate) {
-          tile.entity.health = targetTileUpdate.entity.health;
-        } else {
-          tile.entity = {};
-        }
-        this.player.coordinate = userUpdate.coordinate;
-        this.tileMap[
-          coordinateToIndex(this.player.coordinate, this.size)
-        ].entity = this.player;
+        this.player.moves[this.selectedMove].execute(
+          this.tileMap,
+          this.player,
+          tile
+        );
+
+        this.updateParentEntities();
         this.clearPossiblemoves();
         this.$emit("endTurn");
       }
     },
     async enemyTurn() {
-      for (const entity of this.entities) {
-        if (entity.health <= 0) {
+      for (const index in this.entities) {
+        const entity = this.entities[index];
+        if (entity.health <= 0 || entity.entityID === "player") {
           continue;
         }
         const move = entity.moves[0];
         const area = move.getClickableArea(entity, this.size);
-        const currentTile =
-          this.tileMap[coordinateToIndex(entity.coordinate, this.size)];
         let closest_tile = { x: -1, y: -1 };
         if (area.length > 0) {
           closest_tile = area.reduce((prev, curr) => {
@@ -128,21 +128,14 @@ export default {
           }
         }
         await timeout(400);
-        this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity =
-          {};
-        const { userUpdate, targetTileUpdate } = move.onClick(
+
+        move.execute(
+          this.tileMap,
           entity,
           this.tileMap[coordinateToIndex(nextMove, this.size)]
         );
-        if (targetTileUpdate) {
-          this.tileMap[coordinateToIndex(nextMove, this.size)].entity.health =
-            targetTileUpdate.entity.health;
-        } else {
-          this.tileMap[coordinateToIndex(nextMove, this.size)].entity = {};
-        }
-        entity.coordinate = userUpdate.coordinate;
-        this.tileMap[coordinateToIndex(entity.coordinate, this.size)].entity =
-          entity;
+
+        this.updateParentEntities();
         this.clearPossiblemoves();
         await timeout(100);
       }
@@ -170,12 +163,11 @@ export default {
   },
   mounted() {
     this.calculategridSizeBoundary();
-    for (let entity of this.entities) {
+    for (const index in this.entities) {
+      const entity = this.entities[index];
       let idx = coordinateToIndex(entity.coordinate, this.size);
       this.tileMap[idx].entity = entity;
     }
-    const idx = coordinateToIndex(this.player.coordinate, this.size);
-    this.tileMap[idx].entity = this.player;
   },
   destroyed() {
     window.removeEventListener("resize", this.calculategridSizeBoundary);
