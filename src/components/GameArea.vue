@@ -3,28 +3,30 @@ import { coordinateToIndex, timeout } from "../utils/Utils";
 
 export default {
   props: {
-    entities: Object,
+    level: Object,
     selectedMove: Number,
     isPlayerTurn: Boolean,
   },
   emits: ["endTurn", "entitiesUpdate"],
   data() {
     return {
-      size: 5,
       possibleMoves: Array(),
-      tileMap: Array(),
+      tileMap: Object(),
       isGridHeightBound: true,
     };
   },
   computed: {
     player() {
-      return this.entities.player;
+      return this.level.entities.player;
+    },
+    entities() {
+      return this.level.entities;
     },
     initialTileMap() {
       let tiles = {};
-      for (let y = this.size; y > 0; y--) {
-        for (let x = 1; x <= this.size; x++) {
-          tiles[coordinateToIndex({ x, y }, this.size)] = {
+      for (let y = this.level.size; y > 0; y--) {
+        for (let x = 1; x <= this.level.size; x++) {
+          tiles[coordinateToIndex({ x, y }, this.level.size)] = {
             coordinate: { x, y },
             color: "white",
             entity: {},
@@ -34,7 +36,7 @@ export default {
       return tiles;
     },
     gridStyle() {
-      return `repeat(${this.size}, 1fr)`;
+      return `repeat(${this.level.size}, 1fr)`;
     },
   },
   methods: {
@@ -56,9 +58,9 @@ export default {
         this.selectedMove === -1
           ? this.player.neutral
           : this.player.moves[this.selectedMove];
-      const area = move.getClickableArea(this.player, this.size);
+      const area = move.getClickableArea(this.player, this.level.size);
       for (let tile of area) {
-        const idx = coordinateToIndex(tile, this.size);
+        const idx = coordinateToIndex(tile, this.level.size);
 
         let tileType = "empty";
         switch (this.tileMap[idx].entity.type) {
@@ -83,7 +85,7 @@ export default {
       }
     },
     grid_click(tile) {
-      const clickedIndex = coordinateToIndex(tile.coordinate, this.size);
+      const clickedIndex = coordinateToIndex(tile.coordinate, this.level.size);
       if (this.possibleMoves.includes(clickedIndex)) {
         this.player.moves[this.selectedMove].execute(
           this.tileMap,
@@ -103,7 +105,7 @@ export default {
           continue;
         }
         const move = entity.moves[0];
-        const area = move.getClickableArea(entity, this.size);
+        const area = move.getClickableArea(entity, this.level.size);
         let closest_tile = { x: -1, y: -1 };
         if (area.length > 0) {
           closest_tile = area.reduce((prev, curr) => {
@@ -118,7 +120,7 @@ export default {
         }
         let nextMove = closest_tile;
         for (let tile of area) {
-          const idx = coordinateToIndex(tile, this.size);
+          const idx = coordinateToIndex(tile, this.level.size);
           this.possibleMoves.push(idx);
           if (this.tileMap[idx].entity === this.player) {
             this.tileMap[idx].color = "red";
@@ -132,7 +134,7 @@ export default {
         move.execute(
           this.tileMap,
           entity,
-          this.tileMap[coordinateToIndex(nextMove, this.size)]
+          this.tileMap[coordinateToIndex(nextMove, this.level.size)]
         );
 
         this.updateParentEntities();
@@ -165,7 +167,7 @@ export default {
     this.calculategridSizeBoundary();
     for (const index in this.entities) {
       const entity = this.entities[index];
-      let idx = coordinateToIndex(entity.coordinate, this.size);
+      let idx = coordinateToIndex(entity.coordinate, this.level.size);
       this.tileMap[idx].entity = entity;
     }
   },

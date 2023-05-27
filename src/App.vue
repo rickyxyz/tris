@@ -2,8 +2,8 @@
 import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
 import Attack from "./data/Attack.js";
-import { Entity, makeEntitiesObject } from "./classes/Entity";
-import Enemy from "./data/Enemy.js";
+import Stage from "./classes/Stage";
+import Level from "./data/Level";
 
 export default {
   components: {
@@ -15,25 +15,24 @@ export default {
       isMobile: false,
       // gameMode: "main menu",
       gameMode: "play",
-      entities: makeEntitiesObject([
-        Entity({
+      level: Stage(
+        {
           name: "hero",
           type: "player",
           coordinate: { x: 3, y: 3 },
           sprite: "👑",
           health: 3,
           moves: [Attack.rush, Attack.slice, Attack.explode],
-        }),
-        Entity({ ...Enemy.sauropod, coordinate: { x: 3, y: 5 } }),
-        Entity({ ...Enemy.t_rex, coordinate: { x: 4, y: 4 } }),
-      ]),
+        },
+        Level.level_01
+      ),
       selectedMoveIndex: -1,
       isPlayerTurn: true,
     };
   },
   computed: {
     player() {
-      return this.entities.player;
+      return this.level.entities.player;
     },
   },
   methods: {
@@ -60,10 +59,6 @@ export default {
         move = -1;
       }
       this.selectedMoveIndex = move;
-    },
-    updateEntities(entitiesUpdate) {
-      console.log(entitiesUpdate);
-      this.entities = entitiesUpdate;
     },
   },
   watch: {
@@ -108,11 +103,10 @@ export default {
     </div>
     <GameArea
       :isMobile="isMobile"
-      :entities="entities"
+      :level="level"
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
       @endTurn="switchTurn()"
-      @entitiesUpdate="(update) => updateEntities(update)"
     ></GameArea>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet
