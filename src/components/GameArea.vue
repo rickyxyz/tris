@@ -11,7 +11,6 @@ export default {
   data() {
     return {
       possibleMoves: Array(),
-      tileMap: Object(),
       isGridHeightBound: true,
     };
   },
@@ -21,19 +20,6 @@ export default {
     },
     entities() {
       return this.level.entities;
-    },
-    initialTileMap() {
-      let tiles = {};
-      for (let y = this.level.size; y > 0; y--) {
-        for (let x = 1; x <= this.level.size; x++) {
-          tiles[coordinateToIndex({ x, y }, this.level.size)] = {
-            coordinate: { x, y },
-            color: "white",
-            entity: {},
-          };
-        }
-      }
-      return tiles;
     },
     gridStyle() {
       return `repeat(${this.level.size}, 1fr)`;
@@ -49,7 +35,7 @@ export default {
     },
     clearPossiblemoves() {
       for (let tile of this.possibleMoves) {
-        this.tileMap[tile].color = "white";
+        this.level.tileMap[tile].color = "white";
       }
       this.possibleMoves = [];
     },
@@ -63,7 +49,7 @@ export default {
         const idx = coordinateToIndex(tile, this.level.size);
 
         let tileType = "empty";
-        switch (this.tileMap[idx].entity.type) {
+        switch (this.level.tileMap[idx].entity.type) {
           case "enemy":
             tileType = "enemy";
             break;
@@ -72,28 +58,19 @@ export default {
             break;
         }
 
-        this.tileMap[idx].color = move.colorMap[tileType];
+        this.level.tileMap[idx].color = move.colorMap[tileType];
         this.possibleMoves.push(idx);
-      }
-    },
-    updateParentEntities() {
-      for (const index in this.tileMap) {
-        const entity = this.tileMap[index].entity;
-        if (Object.keys(entity).length !== 0 || entity.constructor !== Object) {
-          this.entities[entity.entityID] = entity;
-        }
       }
     },
     grid_click(tile) {
       const clickedIndex = coordinateToIndex(tile.coordinate, this.level.size);
       if (this.possibleMoves.includes(clickedIndex)) {
         this.player.moves[this.selectedMove].execute(
-          this.tileMap,
+          this.level.tileMap,
           this.player,
           tile
         );
 
-        this.updateParentEntities();
         this.clearPossiblemoves();
         this.$emit("endTurn");
       }
@@ -122,22 +99,21 @@ export default {
         for (let tile of area) {
           const idx = coordinateToIndex(tile, this.level.size);
           this.possibleMoves.push(idx);
-          if (this.tileMap[idx].entity === this.player) {
-            this.tileMap[idx].color = "red";
+          if (this.level.tileMap[idx].entity === this.player) {
+            this.level.tileMap[idx].color = "red";
             nextMove = tile;
           } else {
-            this.tileMap[idx].color = "blue";
+            this.level.tileMap[idx].color = "blue";
           }
         }
         await timeout(400);
 
         move.execute(
-          this.tileMap,
+          this.level.tileMap,
           entity,
-          this.tileMap[coordinateToIndex(nextMove, this.level.size)]
+          this.level.tileMap[coordinateToIndex(nextMove, this.level.size)]
         );
 
-        this.updateParentEntities();
         this.clearPossiblemoves();
         await timeout(100);
       }
@@ -157,9 +133,6 @@ export default {
       }
     },
   },
-  beforeMount() {
-    this.tileMap = this.initialTileMap;
-  },
   created() {
     window.addEventListener("resize", this.calculategridSizeBoundary);
   },
@@ -168,7 +141,7 @@ export default {
     for (const index in this.entities) {
       const entity = this.entities[index];
       let idx = coordinateToIndex(entity.coordinate, this.level.size);
-      this.tileMap[idx].entity = entity;
+      this.level.tileMap[idx].entity = entity;
     }
   },
   destroyed() {
@@ -184,18 +157,18 @@ export default {
       :style="[this.isGridHeightBound ? { height: '100%' } : { width: '100%' }]"
     >
       <div
-        v-for="(tile, idx) in this.tileMap"
+        v-for="(tile, idx) in this.level.tileMap"
         :key="idx"
         class="game_tile"
         :class="[tile.color]"
         @click="grid_click(tile)"
       >
-        <div class="game_tile-health_bar">
+        <div class="game_tile-health_bar" v-if="tile.entity">
           <span class="game_tile-heart" v-for="health in tile.entity.health">
             ❤️
           </span>
         </div>
-        {{ tile.entity.sprite }}
+        {{ tile.entity ? tile.entity.sprite : "" }}
       </div>
     </div>
   </div>

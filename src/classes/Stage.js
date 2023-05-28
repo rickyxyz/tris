@@ -1,16 +1,38 @@
 import { Entity } from "./Entity";
+import { coordinateToIndex } from "../utils/Utils";
 
 export default function Stage(player, level) {
   let entityCounter = 0;
   let entities = {};
+  let tileMap = {};
+
+  for (let y = level.size; y > 0; y--) {
+    for (let x = 1; x <= level.size; x++) {
+      tileMap[coordinateToIndex({ x, y }, level.size)] = {
+        coordinate: { x, y },
+        color: "white",
+        entity: {},
+      };
+    }
+  }
 
   function reset() {
+    for (const tileIndex in this.tileMap) {
+      if (Object.hasOwnProperty.call(tileMap, tileIndex)) {
+        const tile = this.tileMap[tileIndex];
+        tile.entity = {};
+        tile.color = "white";
+      }
+    }
     for (const entityID in this.entities) {
       if (Object.hasOwnProperty.call(this.entities, entityID)) {
         const entity = this.entities[entityID];
         entity.reset();
+        this.tileMap[coordinateToIndex(entity.coordinate, level.size)].entity =
+          entity;
       }
     }
+
     return this;
   }
 
@@ -43,6 +65,7 @@ export default function Stage(player, level) {
     size: level.size,
     entities: entities,
     nextLevel: level.nextLevel,
+    tileMap,
     reset,
   };
 }

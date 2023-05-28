@@ -36,6 +36,9 @@ export default {
     },
   },
   methods: {
+    resetStage() {
+      this.level = this.level.reset();
+    },
     determineDeviceType() {
       let value = "100vh";
       if (window.innerWidth && window.innerWidth <= 1100) {
@@ -100,6 +103,7 @@ export default {
     <div id="status_bar">
       Status Bar | HP: {{ this.player.health }} |
       {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
+      <button @click="resetStage">reset</button>
     </div>
     <GameArea
       :isMobile="isMobile"
