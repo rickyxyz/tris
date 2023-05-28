@@ -19,7 +19,7 @@ export default {
         {
           name: "hero",
           type: "player",
-          coordinate: { x: 3, y: 3 },
+          coordinate: { x: 2, y: 2 },
           sprite: "👑",
           health: 3,
           moves: [Attack.rush, Attack.slice, Attack.explode],

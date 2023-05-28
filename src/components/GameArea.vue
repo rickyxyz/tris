@@ -138,11 +138,6 @@ export default {
   },
   mounted() {
     this.calculategridSizeBoundary();
-    for (const index in this.entities) {
-      const entity = this.entities[index];
-      let idx = coordinateToIndex(entity.coordinate, this.level.size);
-      this.level.tileMap[idx].entity = entity;
-    }
   },
   destroyed() {
     window.removeEventListener("resize", this.calculategridSizeBoundary);
