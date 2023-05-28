@@ -103,10 +103,8 @@ export default {
     <div id="status_bar">
       Status Bar | HP: {{ this.player.health }} |
       {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
-      <button @click="resetStage">reset</button>
     </div>
     <GameArea
-      :isMobile="isMobile"
       :level="level"
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
