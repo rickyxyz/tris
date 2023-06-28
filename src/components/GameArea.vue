@@ -40,26 +40,33 @@ export default {
       this.possibleMoves = [];
     },
     generateAction() {
-      const move =
-        this.selectedMove === -1
-          ? this.player.neutral
-          : this.player.moves[this.selectedMove];
-      const area = move.getClickableArea(this.player, this.level.size);
-      for (let tile of area) {
-        const idx = coordinateToIndex(tile, this.level.size);
+      if (this.selectedMove === -1) {
+        this.clearPossiblemoves();
+      } else {
+        const move = this.player.moves[this.selectedMove];
 
-        let tileType = "empty";
-        switch (this.level.tileMap[idx].entity.type) {
-          case "enemy":
-            tileType = "enemy";
-            break;
-          case "player":
-            tileType = "self";
-            break;
+        const area = move.getClickableArea(
+          this.player,
+          this.level.tileMap,
+          this.level.size
+        );
+
+        for (let tile of area) {
+          const idx = coordinateToIndex(tile, this.level.size);
+
+          let tileType = "empty";
+          switch (this.level.tileMap[idx].entity.type) {
+            case "enemy":
+              tileType = "enemy";
+              break;
+            case "player":
+              tileType = "self";
+              break;
+          }
+
+          this.level.tileMap[idx].color = move.colorMap[tileType];
+          this.possibleMoves.push(idx);
         }
-
-        this.level.tileMap[idx].color = move.colorMap[tileType];
-        this.possibleMoves.push(idx);
       }
     },
     grid_click(tile) {
@@ -82,7 +89,11 @@ export default {
           continue;
         }
         const move = entity.moves[0];
-        const area = move.getClickableArea(entity, this.level.size);
+        const area = move.getClickableArea(
+          entity,
+          this.level.tileMap,
+          this.level.size
+        );
         let closest_tile = { x: -1, y: -1 };
         if (area.length > 0) {
           closest_tile = area.reduce((prev, curr) => {
@@ -129,6 +140,7 @@ export default {
     },
     isPlayerTurn() {
       if (!this.isPlayerTurn) {
+        console.log("GAO");
         this.enemyTurn();
       }
     },
@@ -206,5 +218,13 @@ export default {
 
 .red {
   background-color: #ff362888;
+}
+
+.white {
+  background-color: #ffffff;
+}
+
+.grey {
+  background-color: #565656;
 }
 </style>
