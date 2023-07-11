@@ -1,14 +1,204 @@
 import { calculateCollisionResult, coordinateToIndex } from "../utils/Utils";
 
 export default function Move({ name, action }) {
+  let possibleMovesCache = [];
+
   function getClickableArea(user, tileMap, boundary) {
-    return calculatePossibleMoves(
-      user.coordinate,
-      action.direction,
-      action.range,
-      boundary,
+    const { x, y } = user.coordinate;
+    const shape = action.direction;
+    const range = action.range;
+    const bound = boundary;
+    let possibleMoves = [];
+
+    function calculateDirectionalMove(
+      { x0, y0 },
+      directionName,
+      range,
+      bound,
       tileMap
+    ) {
+      const directionDictionary = {
+        UP: { x: 0, y: 1 },
+        DOWN: { x: 0, y: -1 },
+        LEFT: { x: -1, y: 0 },
+        RIGHT: { x: 1, y: 0 },
+        "UP-RIGHT": { x: 1, y: 1 },
+        "UP-LEFT": { x: -1, y: 1 },
+        "DOWN-RIGHT": { x: 1, y: -1 },
+        "DOWN-LEFT": { x: -1, y: -1 },
+      };
+      const direction = directionDictionary[directionName];
+      const possibleMoves = [];
+
+      function withinBound(distanceX, distanceY) {
+        const boundX = direction.x > 0 ? bound : 1;
+        const boundY = direction.y > 0 ? bound : 1;
+
+        return (
+          (direction.x != 0
+            ? direction.x > 0
+              ? x0 + distanceX <= boundX
+              : x0 + distanceX >= boundX
+            : true) &&
+          (direction.y != 0
+            ? direction.y > 0
+              ? y0 + distanceY <= boundY
+              : y0 + distanceY >= boundY
+            : true)
+        );
+      }
+
+      for (let distance = 1; distance <= range; distance++) {
+        const distanceX = direction.x * distance;
+        const distanceY = direction.y * distance;
+
+        if (
+          withinBound(distanceX, distanceY) &&
+          tileMap[
+            coordinateToIndex({ x: x0 + distanceX, y: y0 + distanceY }, bound)
+          ].isOccupiable
+        )
+          possibleMoves.push({ x: x0 + distanceX, y: y0 + distanceY });
+        else break;
+      }
+
+      return possibleMoves;
+    }
+
+    switch (shape) {
+      case "plus":
+        possibleMoves.push(
+          ...calculateDirectionalMove(
+            { x0: x, y0: y },
+            "UP",
+            range,
+            bound,
+            tileMap
+          ),
+          ...calculateDirectionalMove(
+            { x0: x, y0: y },
+            "DOWN",
+            range,
+            bound,
+            tileMap
+          ),
+          ...calculateDirectionalMove(
+            { x0: x, y0: y },
+            "LEFT",
+            range,
+            bound,
+            tileMap
+          ),
+          ...calculateDirectionalMove(
+            { x0: x, y0: y },
+            "RIGHT",
+            range,
+            bound,
+            tileMap
+          )
+        );
+        break;
+      case "cross":
+        possibleMoves.push(
+          ...calculateDirectionalMove(
+            { x0: x, y0: y },
+            "UP-RIGHT",
+            range,
+            bound,
+            tileMap
+          ),
+          ...calculateDirectionalMove(
+            { x0: x, y0: y },
+            "UP-LEFT",
+            range,
+            bound,
+            tileMap
+          ),
+          ...calculateDirectionalMove(
+            { x0: x, y0: y },
+            "DOWN-RIGHT",
+            range,
+            bound,
+            tileMap
+          ),
+          ...calculateDirectionalMove(
+            { x0: x, y0: y },
+            "DOWN-LEFT",
+            range,
+            bound,
+            tileMap
+          )
+        );
+        break;
+      case "radius":
+        const exploreQueue = [{ x, y, dist: 0 }];
+        const explored = new Set();
+
+        while (exploreQueue.length) {
+          const curr = exploreQueue.pop();
+          explored.add(JSON.stringify({ x: curr.x, y: curr.y }));
+
+          if (
+            curr.y + 1 <= bound &&
+            curr.dist + 1 <= range &&
+            tileMap[coordinateToIndex({ x: curr.x, y: curr.y + 1 }, bound)]
+              .isOccupiable &&
+            !explored.has(JSON.stringify({ x: curr.x, y: curr.y + 1 }))
+          )
+            exploreQueue.push({
+              x: curr.x,
+              y: curr.y + 1,
+              dist: curr.dist + 1,
+            });
+          if (
+            curr.x + 1 <= bound &&
+            curr.dist + 1 <= range &&
+            tileMap[coordinateToIndex({ x: curr.x + 1, y: curr.y }, bound)]
+              .isOccupiable &&
+            !explored.has(JSON.stringify({ x: curr.x + 1, y: curr.y }))
+          )
+            exploreQueue.push({
+              x: curr.x + 1,
+              y: curr.y,
+              dist: curr.dist + 1,
+            });
+          if (
+            curr.y - 1 > 0 &&
+            curr.dist + 1 <= range &&
+            tileMap[coordinateToIndex({ x: curr.x, y: curr.y - 1 }, bound)]
+              .isOccupiable &&
+            !explored.has(JSON.stringify({ x: curr.x, y: curr.y - 1 }))
+          )
+            exploreQueue.push({
+              x: curr.x,
+              y: curr.y - 1,
+              dist: curr.dist + 1,
+            });
+          if (
+            curr.x - 1 > 0 &&
+            curr.dist + 1 <= range &&
+            tileMap[coordinateToIndex({ x: curr.x - 1, y: curr.y }, bound)]
+              .isOccupiable &&
+            !explored.has(JSON.stringify({ x: curr.x - 1, y: curr.y }))
+          )
+            exploreQueue.push({
+              x: curr.x - 1,
+              y: curr.y,
+              dist: curr.dist + 1,
+            });
+        }
+
+        Array.from(explored).map((a) => possibleMoves.push(JSON.parse(a)));
+        break;
+    }
+
+    possibleMoves = possibleMoves.filter(
+      ({ x, y }) => y > 0 && x > 0 && y <= bound && x <= bound
     );
+
+    possibleMovesCache = possibleMoves;
+
+    return possibleMoves;
   }
 
   function execute(tileMap, user, targetTile) {
@@ -43,7 +233,7 @@ export default function Move({ name, action }) {
         }
         break;
       case "collateral":
-        const area = getClickableArea(user, size);
+        const area = possibleMovesCache;
         for (let tile of area) {
           const idx = coordinateToIndex(tile, size);
           const tileEntity = tileMap[idx].entity;
@@ -67,304 +257,6 @@ export default function Move({ name, action }) {
     getClickableArea,
     execute,
   };
-}
-
-function calculatePossibleMoves({ x, y }, shape, range, bound, tileMap) {
-  let possibleMoves = [];
-  switch (shape) {
-    case "plus":
-      // RIGHT
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          x + distance <= bound &&
-          tileMap[coordinateToIndex({ x: x + distance, y }, bound)].isOccupiable
-        )
-          possibleMoves.push({ x: x + distance, y });
-        else break;
-      }
-
-      // LEFT
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          x - distance >= 1 &&
-          tileMap[coordinateToIndex({ x: x - distance, y }, bound)].isOccupiable
-        )
-          possibleMoves.push({ x: x - distance, y });
-        else break;
-      }
-
-      // UP
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          y + distance <= bound &&
-          tileMap[coordinateToIndex({ x, y: y + distance }, bound)].isOccupiable
-        )
-          possibleMoves.push({ x, y: y + distance });
-        else break;
-      }
-
-      // DOWN
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          y - distance >= 1 &&
-          tileMap[coordinateToIndex({ x, y: y - distance }, bound)].isOccupiable
-        )
-          possibleMoves.push({ x, y: y - distance });
-        else break;
-      }
-      break;
-    case "cross":
-      // UP-RIGHT
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          x + distance <= bound &&
-          y + distance <= bound &&
-          tileMap[
-            coordinateToIndex({ x: x + distance, y: y + distance }, bound)
-          ].isOccupiable
-        ) {
-          possibleMoves.push({ x: x + distance, y: y + distance });
-        } else break;
-      }
-
-      // // UP-LEFT
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          x - distance >= 1 &&
-          y + distance <= bound &&
-          tileMap[
-            coordinateToIndex({ x: x - distance, y: y + distance }, bound)
-          ].isOccupiable
-        )
-          possibleMoves.push({ x: x - distance, y: y + distance });
-        else break;
-      }
-
-      // // DOWN-RIGHT
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          x + distance <= bound &&
-          y - distance >= 1 &&
-          tileMap[
-            coordinateToIndex({ x: x + distance, y: y - distance }, bound)
-          ].isOccupiable
-        )
-          possibleMoves.push({ x: x + distance, y: y - distance });
-        else break;
-      }
-
-      // // DOWN-LEFT
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          x - distance >= 1 &&
-          y - distance >= 1 &&
-          tileMap[
-            coordinateToIndex({ x: x - distance, y: y - distance }, bound)
-          ].isOccupiable
-        )
-          possibleMoves.push({ x: x - distance, y: y - distance });
-        else break;
-      }
-      break;
-    case "radius":
-      // RIGHT
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          x + distance <= bound &&
-          tileMap[coordinateToIndex({ x: x + distance, y }, bound)].isOccupiable
-        ) {
-          possibleMoves.push({ x: x + distance, y });
-
-          // UP
-          for (
-            let distance_up = 1;
-            distance_up <= range - distance;
-            distance_up++
-          ) {
-            if (
-              y + distance_up <= bound &&
-              tileMap[
-                coordinateToIndex(
-                  { x: x + distance, y: y + distance_up },
-                  bound
-                )
-              ].isOccupiable
-            )
-              possibleMoves.push({ x: x + distance, y: y + distance_up });
-            else break;
-          }
-
-          // DOWN
-          for (
-            let distance_up = 1;
-            distance_up <= range - distance;
-            distance_up++
-          ) {
-            if (
-              y + distance_up <= bound &&
-              tileMap[
-                coordinateToIndex(
-                  { x: x + distance, y: y - distance_up },
-                  bound
-                )
-              ].isOccupiable
-            )
-              possibleMoves.push({ x: x + distance, y: y - distance_up });
-            else break;
-          }
-        } else break;
-      }
-
-      // LEFT
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          x - distance >= 1 &&
-          tileMap[coordinateToIndex({ x: x - distance, y }, bound)].isOccupiable
-        ) {
-          possibleMoves.push({ x: x - distance, y });
-          // UP
-          for (
-            let distance_up = 1;
-            distance_up <= range - distance;
-            distance_up++
-          ) {
-            if (
-              y + distance_up <= bound &&
-              tileMap[
-                coordinateToIndex(
-                  { x: x - distance, y: y + distance_up },
-                  bound
-                )
-              ].isOccupiable
-            )
-              possibleMoves.push({ x: x - distance, y: y + distance_up });
-            else break;
-          }
-
-          // DOWN
-          for (
-            let distance_up = 1;
-            distance_up <= range - distance;
-            distance_up++
-          ) {
-            if (
-              y + distance_up <= bound &&
-              tileMap[
-                coordinateToIndex(
-                  { x: x - distance, y: y - distance_up },
-                  bound
-                )
-              ].isOccupiable
-            )
-              possibleMoves.push({ x: x - distance, y: y - distance_up });
-            else break;
-          }
-        } else break;
-      }
-
-      // UP
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          y + distance <= bound &&
-          tileMap[coordinateToIndex({ x, y: y + distance }, bound)].isOccupiable
-        ) {
-          possibleMoves.push({ x, y: y + distance });
-
-          // RIGHT
-          for (
-            let distance_up = 1;
-            distance_up <= range - distance;
-            distance_up++
-          ) {
-            if (
-              x + distance_up <= bound &&
-              tileMap[
-                coordinateToIndex(
-                  { x: x + distance_up, y: y + distance },
-                  bound
-                )
-              ].isOccupiable
-            )
-              possibleMoves.push({ x: x + distance_up, y: y + distance });
-            else break;
-          }
-
-          // LEFT
-          for (
-            let distance_up = 1;
-            distance_up <= range - distance;
-            distance_up++
-          ) {
-            if (
-              x - distance_up <= bound &&
-              tileMap[
-                coordinateToIndex(
-                  { x: x - distance_up, y: y + distance },
-                  bound
-                )
-              ].isOccupiable
-            )
-              possibleMoves.push({ x: x - distance_up, y: y + distance });
-            else break;
-          }
-        } else break;
-      }
-
-      // DOWN
-      for (let distance = 1; distance <= range; distance++) {
-        if (
-          y - distance >= 1 &&
-          tileMap[coordinateToIndex({ x, y: y - distance }, bound)].isOccupiable
-        ) {
-          possibleMoves.push({ x, y: y - distance });
-
-          // RIGHT
-          for (
-            let distance_up = 1;
-            distance_up <= range - distance;
-            distance_up++
-          ) {
-            if (
-              x + distance_up <= bound &&
-              tileMap[
-                coordinateToIndex(
-                  { x: x + distance_up, y: y - distance },
-                  bound
-                )
-              ].isOccupiable
-            )
-              possibleMoves.push({ x: x + distance_up, y: y - distance });
-            else break;
-          }
-
-          // LEFT
-          for (
-            let distance_up = 1;
-            distance_up <= range - distance;
-            distance_up++
-          ) {
-            if (
-              x - distance_up <= bound &&
-              tileMap[
-                coordinateToIndex(
-                  { x: x - distance_up, y: y - distance },
-                  bound
-                )
-              ].isOccupiable
-            )
-              possibleMoves.push({ x: x - distance_up, y: y - distance });
-            else break;
-          }
-        } else break;
-      }
-      break;
-  }
-
-  possibleMoves = possibleMoves.filter(
-    ({ x, y }) => y > 0 && x > 0 && y <= bound && x <= bound
-  );
-
-  return possibleMoves;
 }
 
 const tileColorMap = {
