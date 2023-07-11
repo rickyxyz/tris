@@ -140,7 +140,6 @@ export default {
     },
     isPlayerTurn() {
       if (!this.isPlayerTurn) {
-        console.log("GAO");
         this.enemyTurn();
       }
     },
