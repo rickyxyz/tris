@@ -3,7 +3,7 @@ import GameArea from "./components/GameArea.vue";
 import MoveSet from "./components/MoveSet.vue";
 import Attack from "./data/Attack.js";
 import Stage from "./classes/Stage";
-import Level from "./data/Level";
+import { Level } from "./data/Level";
 
 export default {
   components: {
