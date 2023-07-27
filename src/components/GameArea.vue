@@ -1,5 +1,6 @@
 <script lang="ts">
 import { coordinateToIndex, timeout } from "../utils/Utils";
+import * as move from "../classes/Move";
 
 export default {
   props: {
@@ -55,7 +56,7 @@ export default {
             enemy: "red",
           },
         };
-        const move = this.player.moves[this.selectedMove];
+
         const newMove = this.player.moveSet[this.selectedMove];
 
         const area = move.getClickableArea(
@@ -87,7 +88,7 @@ export default {
     grid_click(tile) {
       const clickedIndex = coordinateToIndex(tile.coordinate, this.level.size);
       if (this.possibleMoves.includes(clickedIndex)) {
-        this.player.moves[this.selectedMove].execute(
+        move.execute(
           this.level.tileMap,
           this.player,
           tile,
@@ -104,7 +105,6 @@ export default {
         if (entity.health <= 0 || entity.entityID === "player") {
           continue;
         }
-        const move = entity.moves[0];
         const area = move.getClickableArea(
           entity,
           this.level.tileMap,

@@ -79,7 +79,6 @@ export default {
   },
   mounted() {
     this.determineDeviceType();
-    this.selectedMove = Attack.neutral;
   },
   destroyed() {
     window.removeEventListener("resize", this.determineDeviceType);
