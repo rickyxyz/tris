@@ -1,9 +1,9 @@
 import { calculateCollisionResult, coordinateToIndex } from "../utils/Utils";
 
-export default function Move({ name, action }) {
+export default function Move() {
   let possibleMovesCache = [];
 
-  function getClickableArea(user, tileMap, boundary) {
+  function getClickableArea(user, tileMap, boundary, { _, action }) {
     const { x, y } = user.coordinate;
     const shape = action.direction;
     const range = action.range;
@@ -201,7 +201,7 @@ export default function Move({ name, action }) {
     return possibleMoves;
   }
 
-  function execute(tileMap, user, targetTile) {
+  function execute(tileMap, user, targetTile, { _, action }) {
     const size = Math.sqrt(Object.keys(tileMap).length);
     const userIndex = coordinateToIndex(user.coordinate, size);
     const clickedTileIndex = coordinateToIndex(targetTile.coordinate, size);
@@ -252,22 +252,7 @@ export default function Move({ name, action }) {
   }
 
   return {
-    name,
-    colorMap: tileColorMap[action.type],
     getClickableArea,
     execute,
   };
 }
-
-const tileColorMap = {
-  attack: {
-    self: "white",
-    empty: "blue",
-    enemy: "red",
-  },
-  collateral: {
-    self: "red",
-    empty: "red",
-    enemy: "red",
-  },
-};

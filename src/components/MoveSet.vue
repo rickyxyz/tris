@@ -1,9 +1,9 @@
 <script lang="ts">
 export default {
   props: {
-    moves: Array
+    moves: Array,
   },
-  emits: ['selectedMove'],
+  emits: ["selectedMove"],
 };
 </script>
 

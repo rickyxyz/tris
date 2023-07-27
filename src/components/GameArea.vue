@@ -43,12 +43,26 @@ export default {
       if (this.selectedMove === -1) {
         this.clearPossiblemoves();
       } else {
+        const tileColorMap = {
+          attack: {
+            self: "white",
+            empty: "blue",
+            enemy: "red",
+          },
+          collateral: {
+            self: "red",
+            empty: "red",
+            enemy: "red",
+          },
+        };
         const move = this.player.moves[this.selectedMove];
+        const newMove = this.player.moveSet[this.selectedMove];
 
         const area = move.getClickableArea(
           this.player,
           this.level.tileMap,
-          this.level.size
+          this.level.size,
+          this.player.moveSet[this.selectedMove]
         );
 
         for (let tile of area) {
@@ -64,7 +78,8 @@ export default {
               break;
           }
 
-          this.level.tileMap[idx].color = move.colorMap[tileType];
+          this.level.tileMap[idx].color =
+            tileColorMap[newMove.action.type][tileType];
           this.possibleMoves.push(idx);
         }
       }
@@ -75,7 +90,8 @@ export default {
         this.player.moves[this.selectedMove].execute(
           this.level.tileMap,
           this.player,
-          tile
+          tile,
+          this.player.moveSet[this.selectedMove]
         );
 
         this.clearPossiblemoves();
@@ -92,7 +108,8 @@ export default {
         const area = move.getClickableArea(
           entity,
           this.level.tileMap,
-          this.level.size
+          this.level.size,
+          entity.moveSet[0]
         );
         let closest_tile = { x: -1, y: -1 };
         if (area.length > 0) {
@@ -122,7 +139,8 @@ export default {
         move.execute(
           this.level.tileMap,
           entity,
-          this.level.tileMap[coordinateToIndex(nextMove, this.level.size)]
+          this.level.tileMap[coordinateToIndex(nextMove, this.level.size)],
+          entity.moveSet[0]
         );
 
         this.clearPossiblemoves();

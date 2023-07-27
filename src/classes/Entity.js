@@ -20,6 +20,7 @@ export function Entity({ name, type, sprite, health, moves, coordinate }) {
     coordinate,
     sprite,
     moves: moves.map((move) => Move(move)),
+    moveSet: moves,
     neutral,
     reset,
   };
