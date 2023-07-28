@@ -2,11 +2,12 @@ import { calculateCollisionResult, coordinateToIndex } from "../utils/Utils";
 
 let possibleMovesCache = [];
 
-export function getClickableArea(user, tileMap, boundary, { _, action }) {
-  const { x, y } = user.coordinate;
-  const shape = action.direction;
-  const range = action.range;
-  const bound = boundary;
+export function getClickableArea(level, entityID, move) {
+  const { x, y } = level.entities[entityID].coordinate;
+  const shape = move.action.direction;
+  const range = move.action.range;
+  const tileMap = level.tileMap;
+  const bound = level.size;
   let possibleMoves = [];
 
   function calculateDirectionalMove(

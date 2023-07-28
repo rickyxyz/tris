@@ -60,9 +60,8 @@ export default {
         const newMove = this.player.moveSet[this.selectedMove];
 
         const area = move.getClickableArea(
-          this.player,
-          this.level.tileMap,
-          this.level.size,
+          this.level,
+          "player",
           this.player.moveSet[this.selectedMove]
         );
 
@@ -106,9 +105,8 @@ export default {
           continue;
         }
         const area = move.getClickableArea(
-          entity,
-          this.level.tileMap,
-          this.level.size,
+          this.level,
+          entity.entityID,
           entity.moveSet[0]
         );
         let closest_tile = { x: -1, y: -1 };
