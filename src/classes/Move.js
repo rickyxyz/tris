@@ -201,10 +201,14 @@ export function getClickableArea(level, entityID, move) {
   return possibleMoves;
 }
 
-export function execute(tileMap, user, targetTile, { _, action }) {
+export function execute(level, entityID, move, targetCoordinate) {
+  const tileMap = level.tileMap;
+  const user = level.entities[entityID];
+  const action = move.action;
   const size = Math.sqrt(Object.keys(tileMap).length);
   const userIndex = coordinateToIndex(user.coordinate, size);
-  const clickedTileIndex = coordinateToIndex(targetTile.coordinate, size);
+  const clickedTileIndex = coordinateToIndex(targetCoordinate, size);
+  const targetTile = tileMap[clickedTileIndex];
 
   switch (action.type) {
     case "attack":

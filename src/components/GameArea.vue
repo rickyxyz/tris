@@ -88,10 +88,10 @@ export default {
       const clickedIndex = coordinateToIndex(tile.coordinate, this.level.size);
       if (this.possibleMoves.includes(clickedIndex)) {
         move.execute(
-          this.level.tileMap,
-          this.player,
-          tile,
-          this.player.moveSet[this.selectedMove]
+          this.level,
+          "player",
+          this.player.moveSet[this.selectedMove],
+          tile.coordinate
         );
 
         this.clearPossiblemoves();
@@ -134,12 +134,7 @@ export default {
         }
         await timeout(400);
 
-        move.execute(
-          this.level.tileMap,
-          entity,
-          this.level.tileMap[coordinateToIndex(nextMove, this.level.size)],
-          entity.moveSet[0]
-        );
+        move.execute(this.level, entity.entityID, entity.moveSet[0], nextMove);
 
         this.clearPossiblemoves();
         await timeout(100);
