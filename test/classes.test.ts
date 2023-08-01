@@ -1,26 +1,27 @@
 import { describe, it, expect } from "vitest";
-import { testPlayer, testLevel } from "./testData";
+import { testPlayer, testLevel1, testLevel2 } from "./testData";
 import Stage from "../src/classes/Stage";
 import * as Move from "../src/classes/Move";
 
-const testStage = Stage(testPlayer, testLevel);
+const testStage1 = Stage(testPlayer, testLevel1);
+const testStage2 = Stage(testPlayer, testLevel2);
 
 describe("Stage", () => {
   it("Constructor should return the correct object", () => {
-    expect(testStage).toBeTypeOf("object");
+    expect(testStage1).toBeTypeOf("object");
   });
 
   it("Stage reset should return the original stage", () => {
-    expect(JSON.stringify(testStage.reset())).toEqual(
-      JSON.stringify(testStage)
+    expect(JSON.stringify(testStage1.reset())).toEqual(
+      JSON.stringify(testStage1)
     );
   });
 });
 
-describe("Move", () => {
+describe("Move.getClickableArea", () => {
   it("getClickableArea should return a plus shape", () => {
     expect(
-      Move.getClickableArea(testStage, "player", {
+      Move.getClickableArea(testStage1, "player", {
         name: "",
         action: {
           direction: "plus",
@@ -41,7 +42,7 @@ describe("Move", () => {
 
   it("getClickableArea should return an x shape", () => {
     expect(
-      Move.getClickableArea(testStage, "player", {
+      Move.getClickableArea(testStage1, "player", {
         name: "",
         action: {
           direction: "cross",
@@ -62,7 +63,7 @@ describe("Move", () => {
 
   it("getClickableArea should return a diamond shape", () => {
     expect(
-      Move.getClickableArea(testStage, "player", {
+      Move.getClickableArea(testStage1, "player", {
         name: "",
         action: {
           direction: "radius",
@@ -84,5 +85,25 @@ describe("Move", () => {
       { x: 3, y: 4 },
       { x: 3, y: 5 },
     ]);
+  });
+});
+
+describe("Move.execute", () => {
+  it("attacking enemy should reduce enemy health", () => {
+    Move.execute(
+      testStage2,
+      "player",
+      {
+        name: "",
+        action: {
+          type: "attack",
+          direction: "cross",
+          range: 2,
+          damage: 1,
+        },
+      },
+      { x: 2, y: 2 }
+    );
+    expect(testStage2.entities[0].health).toBe(1);
   });
 });
