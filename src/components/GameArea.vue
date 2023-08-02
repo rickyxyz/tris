@@ -1,5 +1,6 @@
 <script lang="ts">
 import { coordinateToIndex, timeout } from "../utils/Utils";
+import * as move from "../classes/Move";
 
 export default {
   props: {
@@ -43,12 +44,25 @@ export default {
       if (this.selectedMove === -1) {
         this.clearPossiblemoves();
       } else {
-        const move = this.player.moves[this.selectedMove];
+        const tileColorMap = {
+          attack: {
+            self: "white",
+            empty: "blue",
+            enemy: "red",
+          },
+          collateral: {
+            self: "red",
+            empty: "red",
+            enemy: "red",
+          },
+        };
+
+        const newMove = this.player.moveSet[this.selectedMove];
 
         const area = move.getClickableArea(
-          this.player,
-          this.level.tileMap,
-          this.level.size
+          this.level,
+          "player",
+          this.player.moveSet[this.selectedMove]
         );
 
         for (let tile of area) {
@@ -64,7 +78,8 @@ export default {
               break;
           }
 
-          this.level.tileMap[idx].color = move.colorMap[tileType];
+          this.level.tileMap[idx].color =
+            tileColorMap[newMove.action.type][tileType];
           this.possibleMoves.push(idx);
         }
       }
@@ -72,10 +87,11 @@ export default {
     grid_click(tile) {
       const clickedIndex = coordinateToIndex(tile.coordinate, this.level.size);
       if (this.possibleMoves.includes(clickedIndex)) {
-        this.player.moves[this.selectedMove].execute(
-          this.level.tileMap,
-          this.player,
-          tile
+        move.execute(
+          this.level,
+          "player",
+          this.player.moveSet[this.selectedMove],
+          tile.coordinate
         );
 
         this.clearPossiblemoves();
@@ -88,11 +104,10 @@ export default {
         if (entity.health <= 0 || entity.entityID === "player") {
           continue;
         }
-        const move = entity.moves[0];
         const area = move.getClickableArea(
-          entity,
-          this.level.tileMap,
-          this.level.size
+          this.level,
+          entity.entityID,
+          entity.moveSet[0]
         );
         let closest_tile = { x: -1, y: -1 };
         if (area.length > 0) {
@@ -119,11 +134,7 @@ export default {
         }
         await timeout(400);
 
-        move.execute(
-          this.level.tileMap,
-          entity,
-          this.level.tileMap[coordinateToIndex(nextMove, this.level.size)]
-        );
+        move.execute(this.level, entity.entityID, entity.moveSet[0], nextMove);
 
         this.clearPossiblemoves();
         await timeout(100);

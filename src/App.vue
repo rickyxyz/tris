@@ -79,7 +79,6 @@ export default {
   },
   mounted() {
     this.determineDeviceType();
-    this.selectedMove = Attack.neutral;
   },
   destroyed() {
     window.removeEventListener("resize", this.determineDeviceType);
@@ -112,7 +111,7 @@ export default {
     ></GameArea>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet
-      :moves="this.player.moves"
+      :moves="this.player.moveSet"
       @selectedMove="(move) => selectMove(move)"
       :class="[isMobile ? 'rounded_moveset' : '']"
     ></MoveSet>
