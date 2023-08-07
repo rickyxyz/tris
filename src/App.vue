@@ -10,10 +10,15 @@ export default {
   components: {
     GameArea,
     MoveSet,
+    ShopArea,
   },
   data() {
     return {
-      stageNumber: 1,
+      stageNumber: 2,
+      shopLeft: 1,
+      shopItems: [],
+      isSelecting: false,
+      selectedItem: null,
       isMobile: false,
       gameMode: "play",
       currentStage: Level.level_01,
@@ -70,12 +75,57 @@ export default {
       this.currentStage = Level[this.level.nextLevel];
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
+      this.stageNumber++;
+      if (this.stageNumber % 3 === 0) {
+        this.gameMode = "shop";
+      }
     },
     selectMove(move) {
       if (move === this.selectedMoveIndex) {
         move = -1;
       }
       this.selectedMoveIndex = move;
+    },
+    exitShop() {
+      this.isSelecting = false;
+      this.selectedItem = null;
+      this.shopItems = [];
+      this.gameMode = "play";
+      this.currentStage = Level.level_02;
+      this.shopLeft = 3;
+    },
+    selectShopItem(shopItem) {
+      this.isSelecting = true;
+      this.selectedItem = shopItem;
+      if (shopItem === 9) {
+        this.exitShop();
+      }
+    },
+    changeMove(move) {
+      this.player.moveSet[move] = this.shopItems[this.selectedItem];
+      this.shopItems[this.selectedItem] = {};
+      this.selectedItem = null;
+      this.isSelecting = false;
+      this.shopLeft--;
+      if (this.shopLeft < 1) {
+        this.exitShop();
+      }
+    },
+    generateShopItems() {
+      return [
+        Attack.longRush,
+        Attack.longSlice,
+        Attack.smallExplode,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        {
+          name: "exit",
+        },
+      ];
     },
   },
   watch: {
@@ -102,7 +152,10 @@ export default {
 </script>
 
 <template>
-  <div class="screen-background" v-if="gameMode !== 'play'">
+  <div
+    class="screen-background"
+    v-if="gameMode !== 'play' && gameMode !== 'shop'"
+  >
     <div class="screen-title" v-if="gameMode === 'main menu'">
       <h1>TITLE</h1>
       <h2 @click="this.gameMode = 'play'">Start</h2>
@@ -118,7 +171,13 @@ export default {
       Status Bar | HP: {{ this.player.health }} |
       {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
     </div>
+    <ShopArea
+      v-if="gameMode === 'shop'"
+      @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
+      :shop-items="shopItems"
+    ></ShopArea>
     <GameArea
+      v-else-if="gameMode === 'play'"
       :level="level"
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
@@ -128,7 +187,9 @@ export default {
     <div id="combo_bar">Combo Bar</div>
     <MoveSet
       :moves="this.player.moveSet"
-      @selectedMove="(move) => selectMove(move)"
+      @selectedMove="
+        (move) => (isSelecting ? changeMove(move) : selectMove(move))
+      "
       :class="[isMobile ? 'rounded_moveset' : '']"
     ></MoveSet>
     <div id="spacer" v-if="isMobile"></div>
