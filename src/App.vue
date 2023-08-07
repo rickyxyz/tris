@@ -1,5 +1,6 @@
 <script lang="ts">
 import GameArea from "./components/GameArea.vue";
+import ShopArea from "./components/ShopArea.vue";
 import MoveSet from "./components/MoveSet.vue";
 import Attack from "./data/Attack.js";
 import Stage from "./classes/Stage";
@@ -12,25 +13,33 @@ export default {
   },
   data() {
     return {
+      stageNumber: 1,
       isMobile: false,
-      // gameMode: "main menu",
       gameMode: "play",
-      level: Stage(
-        {
-          name: "hero",
-          type: "player",
-          coordinate: { x: 2, y: 2 },
-          sprite: "👑",
-          health: 3,
-          moves: [Attack.rush, Attack.slice, Attack.explode],
-        },
-        Level.level_01
-      ),
+      currentStage: Level.level_01,
+      playerData: {
+        name: "hero",
+        type: "player",
+        coordinate: { x: 2, y: 2 },
+        sprite: "👑",
+        health: 3,
+        moves: [
+          Attack.rush,
+          Attack.slice,
+          Attack.explode,
+          Attack.locked,
+          Attack.locked,
+          Attack.locked,
+        ],
+      },
       selectedMoveIndex: -1,
       isPlayerTurn: true,
     };
   },
   computed: {
+    level() {
+      return Stage(this.playerData, this.currentStage);
+    },
     player() {
       return this.level.entities.player;
     },
@@ -57,6 +66,11 @@ export default {
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
     },
+    switchStage() {
+      this.currentStage = Level[this.level.nextLevel];
+      this.isPlayerTurn = !this.isPlayerTurn;
+      this.selectMove(-1);
+    },
     selectMove(move) {
       if (move === this.selectedMoveIndex) {
         move = -1;
@@ -79,6 +93,7 @@ export default {
   },
   mounted() {
     this.determineDeviceType();
+    this.shopItems = this.generateShopItems();
   },
   destroyed() {
     window.removeEventListener("resize", this.determineDeviceType);
@@ -108,6 +123,7 @@ export default {
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
       @endTurn="switchTurn()"
+      @end-stage="switchStage()"
     ></GameArea>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet
