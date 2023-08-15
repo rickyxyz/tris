@@ -52,18 +52,10 @@ export default function Stage(player, level) {
     return { tileMap, entities };
   }
 
-  function reset() {
-    return {
-      ...this,
-      ...constructor(),
-    };
-  }
-
   return {
+    ...constructor(),
     name: level.stageName,
     size: level.size,
     nextLevel: level.nextLevel,
-    ...constructor(),
-    reset,
   };
 }
