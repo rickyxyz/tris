@@ -14,20 +14,19 @@ export default {
   },
   data() {
     return {
+      gameMode: "play",
       stageNumber: 2,
       shopLeft: 1,
       shopItems: [],
       isSelecting: false,
       selectedItem: null,
       isMobile: false,
-      gameMode: "play",
       currentStage: Level.level_01,
       playerData: {
         name: "hero",
         type: "player",
-        coordinate: { x: 2, y: 2 },
         sprite: "👑",
-        health: 3,
+        health: 1,
         moves: [
           Attack.rush,
           Attack.slice,
@@ -43,15 +42,18 @@ export default {
   },
   computed: {
     level() {
+      this.gameMode;
       return Stage(this.playerData, this.currentStage);
     },
     player() {
       return this.level.entities.player;
     },
   },
+  watch: {},
   methods: {
     resetStage() {
-      this.level = this.level.reset();
+      this.playerData.health = 1;
+      this.gameMode = "play";
     },
     determineDeviceType() {
       let value = "100vh";
@@ -70,15 +72,16 @@ export default {
     switchTurn() {
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
+      if (this.player.health <= 0) this.gameMode = "game over";
     },
     switchStage() {
+      this.playerData.health = this.level.entities.player.health;
+      this.playerData.moves = this.level.entities.player.moveSet;
       this.currentStage = Level[this.level.nextLevel];
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
       this.stageNumber++;
-      if (this.stageNumber % 3 === 0) {
-        this.gameMode = "shop";
-      }
+      if (this.stageNumber % 3 === 0) this.gameMode = "shop";
     },
     selectMove(move) {
       if (move === this.selectedMoveIndex) {
@@ -128,16 +131,6 @@ export default {
       ];
     },
   },
-  watch: {
-    player: {
-      handler() {
-        if (this.player.health <= 0) {
-          this.gameMode = "game over";
-        }
-      },
-      deep: true,
-    },
-  },
   created() {
     window.addEventListener("resize", this.determineDeviceType);
   },
@@ -162,7 +155,7 @@ export default {
     </div>
     <div class="screen-gameover" v-if="gameMode === 'game over'">
       <h1>GAME OVER</h1>
-      <h2 @click="this.gameMode = 'play'">RETRY</h2>
+      <h2 @click="this.resetStage">RETRY</h2>
     </div>
   </div>
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
