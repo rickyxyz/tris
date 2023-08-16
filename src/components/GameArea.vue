@@ -8,7 +8,7 @@ export default {
     selectedMove: Number,
     isPlayerTurn: Boolean,
   },
-  emits: ["endTurn", "entitiesUpdate"],
+  emits: ["endTurn", "entitiesUpdate", "endStage"],
   data() {
     return {
       possibleMoves: Array(),
@@ -99,11 +99,13 @@ export default {
       }
     },
     async enemyTurn() {
+      let endStage = true;
       for (const index in this.entities) {
         const entity = this.entities[index];
         if (entity.health <= 0 || entity.entityID === "player") {
           continue;
         }
+        endStage = false;
         const area = move.getClickableArea(
           this.level,
           entity.entityID,
@@ -139,7 +141,7 @@ export default {
         this.clearPossiblemoves();
         await timeout(100);
       }
-      this.$emit("endTurn");
+      endStage ? this.$emit("endStage") : this.$emit("endTurn");
     },
   },
   watch: {

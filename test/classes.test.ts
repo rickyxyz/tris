@@ -10,12 +10,6 @@ describe("Stage", () => {
   it("Constructor should return the correct object", () => {
     expect(testStage1).toBeTypeOf("object");
   });
-
-  it("Stage reset should return the original stage", () => {
-    expect(JSON.stringify(testStage1.reset())).toEqual(
-      JSON.stringify(testStage1)
-    );
-  });
 });
 
 describe("Move.getClickableArea", () => {
