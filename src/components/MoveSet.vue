@@ -4,17 +4,29 @@ export default {
     moves: Array,
   },
   emits: ["selectedMove"],
+  computed: {
+    moveSet() {
+      return this.moves;
+    },
+  },
+  methods: {
+    selectMove(idx) {
+      if (this.moveSet[idx].timer <= 0) {
+        this.$emit("selectedMove", idx);
+      }
+    },
+  },
 };
 </script>
 
 <template>
   <div id="move_set">
     <div
-      v-for="(move, idx) in this.moves"
+      v-for="(move, idx) in this.moveSet"
       :key="idx"
-      @click="this.$emit('selectedMove', idx)"
+      @click="selectMove(idx)"
     >
-      {{ move.name }}
+      {{ move.name }} - {{ move.timer }}
     </div>
   </div>
 </template>

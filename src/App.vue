@@ -26,7 +26,7 @@ export default {
         name: "hero",
         type: "player",
         sprite: "👑",
-        health: 1,
+        health: 5,
         moves: [
           Attack.rush,
           Attack.slice,
@@ -71,12 +71,16 @@ export default {
     },
     switchTurn() {
       this.isPlayerTurn = !this.isPlayerTurn;
+      if (this.isPlayerTurn)
+        for (const move of this.player.moves) {
+          if (move.timer > 0) move.timer--;
+        }
       this.selectMove(-1);
       if (this.player.health <= 0) this.gameMode = "game over";
     },
     switchStage() {
       this.playerData.health = this.level.entities.player.health;
-      this.playerData.moves = this.level.entities.player.moveSet;
+      this.playerData.moves = this.level.entities.player.moves;
       this.currentStage = Level[this.level.nextLevel];
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
@@ -105,7 +109,7 @@ export default {
       }
     },
     changeMove(move) {
-      this.player.moveSet[move] = this.shopItems[this.selectedItem];
+      this.player.moves[move] = this.shopItems[this.selectedItem];
       this.shopItems[this.selectedItem] = {};
       this.selectedItem = null;
       this.isSelecting = false;
@@ -179,7 +183,7 @@ export default {
     ></GameArea>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet
-      :moves="this.player.moveSet"
+      :moves="this.player.moves"
       @selectedMove="
         (move) => (isSelecting ? changeMove(move) : selectMove(move))
       "

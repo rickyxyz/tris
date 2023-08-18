@@ -57,12 +57,12 @@ export default {
           },
         };
 
-        const newMove = this.player.moveSet[this.selectedMove];
+        const newMove = this.player.moves[this.selectedMove];
 
         const area = move.getClickableArea(
           this.level,
           "player",
-          this.player.moveSet[this.selectedMove]
+          this.player.moves[this.selectedMove]
         );
 
         for (let tile of area) {
@@ -90,10 +90,11 @@ export default {
         move.execute(
           this.level,
           "player",
-          this.player.moveSet[this.selectedMove],
+          this.player.moves[this.selectedMove],
           tile.coordinate
         );
-
+        this.player.moves[this.selectedMove].timer =
+          this.player.moves[this.selectedMove].cooldown + 1;
         this.clearPossiblemoves();
         this.$emit("endTurn");
       }
@@ -109,7 +110,7 @@ export default {
         const area = move.getClickableArea(
           this.level,
           entity.entityID,
-          entity.moveSet[0]
+          entity.moves[0]
         );
         let closest_tile = { x: -1, y: -1 };
         if (area.length > 0) {
@@ -136,7 +137,7 @@ export default {
         }
         await timeout(400);
 
-        move.execute(this.level, entity.entityID, entity.moveSet[0], nextMove);
+        move.execute(this.level, entity.entityID, entity.moves[0], nextMove);
 
         this.clearPossiblemoves();
         await timeout(100);
