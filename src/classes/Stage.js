@@ -1,4 +1,3 @@
-import { Entity } from "./Entity";
 import { coordinateToIndex } from "../utils/Utils";
 import { tileDictionary } from "../data/Level";
 
@@ -15,19 +14,17 @@ export default function Stage(player, level) {
       }))
     );
 
-    const entities = allEntities
-      .map((entity) => Entity(entity))
-      .reduce((accum, curr) => {
-        if (curr.type === "player") {
-          curr.entityID = "player";
-          accum.player = curr;
-        } else {
-          curr.entityID = entityCounter;
-          accum[entityCounter] = curr;
-          entityCounter++;
-        }
-        return accum;
-      }, {});
+    const entities = allEntities.reduce((accum, curr) => {
+      if (curr.type === "player") {
+        curr.entityID = "player";
+        accum.player = curr;
+      } else {
+        curr.entityID = entityCounter;
+        accum[entityCounter] = curr;
+        entityCounter++;
+      }
+      return accum;
+    }, {});
 
     for (let y = level.size; y > 0; y--) {
       for (let x = 1; x <= level.size; x++) {
