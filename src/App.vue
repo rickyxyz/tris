@@ -3,8 +3,8 @@ import GameArea from "./components/GameArea.vue";
 import ShopArea from "./components/ShopArea.vue";
 import MoveSet from "./components/MoveSet.vue";
 import Attack from "./data/Attack.js";
-import Stage from "./classes/Stage";
-import { Level } from "./data/Level";
+import { Level, tileDictionary } from "./data/Level";
+import { coordinateToIndex } from "./utils/Utils";
 
 export default {
   components: {
@@ -15,6 +15,7 @@ export default {
   data() {
     return {
       gameMode: "play",
+      mainArea: "GameArea",
       stageNumber: 2,
       shopLeft: 1,
       shopItems: [],
@@ -22,7 +23,10 @@ export default {
       selectedItem: null,
       isMobile: false,
       currentStage: Level.level_01,
-      playerData: {
+      selectedMoveIndex: -1,
+      isPlayerTurn: true,
+      level: {},
+      player: {
         name: "hero",
         type: "player",
         sprite: "👑",
@@ -36,23 +40,11 @@ export default {
           Attack.locked,
         ],
       },
-      selectedMoveIndex: -1,
-      isPlayerTurn: true,
     };
   },
-  computed: {
-    level() {
-      this.gameMode;
-      return Stage(this.playerData, this.currentStage);
-    },
-    player() {
-      return this.level.entities.player;
-    },
-  },
-  watch: {},
   methods: {
     resetStage() {
-      this.playerData.health = 1;
+      this.player.health = 1;
       this.gameMode = "play";
     },
     determineDeviceType() {
@@ -78,43 +70,100 @@ export default {
       this.selectMove(-1);
       if (this.player.health <= 0) this.gameMode = "game over";
     },
+    generateStage(player, level) {
+      let entityCounter = 0;
+      const tileMap = {};
+
+      const allEntities = [{ ...player, coordinate: level.spawnPoint }];
+      allEntities.push(
+        ...level.entities.map((entity) => ({
+          ...entity.entity,
+          coordinate: entity.spawnPoint,
+        }))
+      );
+
+      const entities = allEntities.reduce((accum, curr) => {
+        if (curr.type === "player") {
+          curr.entityID = "player";
+          accum.player = curr;
+        } else {
+          curr.entityID = entityCounter;
+          accum[entityCounter] = curr;
+          entityCounter++;
+        }
+        return accum;
+      }, {});
+
+      for (let y = level.size; y > 0; y--) {
+        for (let x = 1; x <= level.size; x++) {
+          const tileType = level.map[coordinateToIndex({ x, y }, level.size)];
+          tileMap[coordinateToIndex({ x, y }, level.size)] = {
+            coordinate: { x, y },
+            color: tileDictionary[tileType].color,
+            isOccupiable: tileDictionary[tileType].isOccupiable,
+            entity: {},
+          };
+        }
+      }
+
+      for (const entityID in entities) {
+        if (Object.hasOwnProperty.call(entities, entityID)) {
+          const entity = entities[entityID];
+          tileMap[coordinateToIndex(entity.coordinate, level.size)].entity =
+            entity;
+        }
+      }
+      return {
+        tileMap,
+        entities,
+        name: level.stageName,
+        size: level.size,
+        nextLevel: level.nextLevel,
+      };
+    },
     switchStage() {
-      this.playerData.health = this.level.entities.player.health;
-      this.playerData.moves = this.level.entities.player.moves;
       this.currentStage = Level[this.level.nextLevel];
-      this.isPlayerTurn = !this.isPlayerTurn;
+      this.isPlayerTurn = true;
+      for (const move of this.player.moves) {
+        move.timer = 0;
+      }
+      this.level = this.generateStage(this.player, this.currentStage);
       this.selectMove(-1);
       this.stageNumber++;
-      if (this.stageNumber % 3 === 0) this.gameMode = "shop";
+      if (this.stageNumber % 3 === 0) {
+        this.mainArea = "shopArea";
+        this.gameMode = "shop";
+      }
     },
     selectMove(move) {
-      if (move === this.selectedMoveIndex) {
-        move = -1;
+      if (this.isSelecting) {
+        this.player.moves[move] = this.shopItems[this.selectedItem];
+        this.shopItems[this.selectedItem] = {};
+        this.selectedItem = null;
+        this.isSelecting = false;
+        this.shopLeft--;
+        if (this.shopLeft < 1) {
+          this.exitShop();
+        }
+      } else {
+        if (move === this.selectedMoveIndex) {
+          move = -1;
+        }
+        this.selectedMoveIndex = move;
       }
-      this.selectedMoveIndex = move;
     },
     exitShop() {
       this.isSelecting = false;
       this.selectedItem = null;
       this.shopItems = [];
+      this.mainArea = "gameArea";
       this.gameMode = "play";
-      this.currentStage = Level.level_02;
       this.shopLeft = 3;
     },
     selectShopItem(shopItem) {
       this.isSelecting = true;
       this.selectedItem = shopItem;
       if (shopItem === 9) {
-        this.exitShop();
-      }
-    },
-    changeMove(move) {
-      this.player.moves[move] = this.shopItems[this.selectedItem];
-      this.shopItems[this.selectedItem] = {};
-      this.selectedItem = null;
-      this.isSelecting = false;
-      this.shopLeft--;
-      if (this.shopLeft < 1) {
         this.exitShop();
       }
     },
@@ -137,6 +186,8 @@ export default {
   },
   created() {
     window.addEventListener("resize", this.determineDeviceType);
+    this.level = this.generateStage(this.player, this.currentStage);
+    this.player = this.level.entities.player;
   },
   mounted() {
     this.determineDeviceType();
@@ -168,25 +219,20 @@ export default {
       Status Bar | HP: {{ this.player.health }} |
       {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
     </div>
-    <ShopArea
-      v-if="gameMode === 'shop'"
-      @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
-      :shop-items="shopItems"
-    ></ShopArea>
-    <GameArea
-      v-else-if="gameMode === 'play'"
+    <component
+      :is="mainArea"
       :level="level"
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
       @endTurn="switchTurn()"
       @end-stage="switchStage()"
-    ></GameArea>
+      @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
+      :shop-items="shopItems"
+    ></component>
     <div id="combo_bar">Combo Bar</div>
     <MoveSet
       :moves="this.player.moves"
-      @selectedMove="
-        (move) => (isSelecting ? changeMove(move) : selectMove(move))
-      "
+      @selectedMove="(move) => selectMove(move)"
       :class="[isMobile ? 'rounded_moveset' : '']"
     ></MoveSet>
     <div id="spacer" v-if="isMobile"></div>
@@ -264,8 +310,5 @@ main {
     "game_area"
     "combo_bar"
     "move_set";
-}
-
-@media (min-width: 1024px) {
 }
 </style>

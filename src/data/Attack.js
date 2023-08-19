@@ -7,6 +7,7 @@ export default {
       range: 0,
       damage: 0,
     },
+    cooldown: -1
   },
   locked: {
     name: "locked",
@@ -16,6 +17,7 @@ export default {
       range: 0,
       damage: 0,
     },
+    cooldown: -1,
   },
   rush: {
     name: "rush",
