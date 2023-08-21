@@ -210,11 +210,10 @@ export default {
 
 .game_tile {
   font-size: calc(1rem + 1vh);
-  border: solid black 1px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: white;
+  border: 1px solid var(--tris-green);
   flex-direction: column;
 }
 
@@ -234,7 +233,7 @@ export default {
 }
 
 .white {
-  background-color: #ffffff;
+  background-color: var(--tris-black);
 }
 
 .grey {

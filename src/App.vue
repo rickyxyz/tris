@@ -31,16 +31,32 @@ export default {
         type: "player",
         sprite: "👑",
         health: 5,
+        maxHealth: 5,
         moves: [
           Attack.rush,
           Attack.slice,
           Attack.explode,
           Attack.locked,
           Attack.locked,
-          Attack.locked,
         ],
       },
     };
+  },
+  computed: {
+    memoryBar() {
+      const barLength = Math.ceil(
+        (this.player.health / this.player.maxHealth) * 20
+      );
+      let color = "";
+      if (barLength > 18) color = "red";
+      else if (barLength > 12) color = "yellow";
+      else if (barLength > 0) color = "green";
+
+      return {
+        length: barLength,
+        color,
+      };
+    },
   },
   methods: {
     resetStage() {
@@ -216,8 +232,10 @@ export default {
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
-      Status Bar | HP: {{ this.player.health }} |
-      {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
+      <div :style="{ color: memoryBar.color }">
+        MEMORY [ {{ "|".repeat(this.memoryBar.length) }}
+        {{ this.player.health }}/{{ this.player.maxHealth }}]
+      </div>
     </div>
     <component
       :is="mainArea"
@@ -229,7 +247,6 @@ export default {
       @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
       :shop-items="shopItems"
     ></component>
-    <div id="combo_bar">Combo Bar</div>
     <MoveSet
       :moves="this.player.moves"
       @selectedMove="(move) => selectMove(move)"
@@ -264,16 +281,26 @@ export default {
   cursor: pointer;
 }
 
+#status_bar {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  background-color: var(--tris-green);
+  border: solid 0.1rem #28e473;
+  padding: 0.2rem 0.6rem;
+}
+
+.status_bar__item {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
 :root {
   --real100vh: 100vh;
-}
-
-div {
-  border: solid black 1px;
-}
-
-#spacer {
-  border: none;
 }
 
 .rounded_moveset {
@@ -281,34 +308,37 @@ div {
   overflow: hidden;
 }
 
+#menu_bar {
+  border: solid 1px var(--tris-green);
+  padding: 0.2rem 0.6rem;
+}
+
 main {
   height: var(--real100vh);
-  overflow: hidden;
-  color: black;
-  display: grid;
   padding: 0.3rem;
+  display: grid;
   gap: 0.2rem;
-  background-color: white;
+  overflow: hidden;
+  background-color: var(--tris-black);
+  color: var(--tris-green);
 }
 
 .mobile_layout {
-  grid-template-rows: 1fr 2fr 23fr 1fr 12fr 1fr;
+  grid-template-rows: 1fr 2fr 23fr 14fr 1fr;
   grid-template-areas:
     "menu_bar"
     "status_bar"
     "game_area"
-    "combo_bar"
     "move_set"
     "spacer";
 }
 
 .desktop_layout {
-  grid-template-rows: 1fr 2fr 23fr 1fr 12fr;
+  grid-template-rows: 1fr 2fr 23fr 12fr;
   grid-template-areas:
     "menu_bar"
     "status_bar"
     "game_area"
-    "combo_bar"
     "move_set";
 }
 </style>
