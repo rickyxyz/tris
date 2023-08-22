@@ -29,9 +29,9 @@ export default {
       player: {
         name: "hero",
         type: "player",
-        sprite: "👑",
-        health: 5,
-        maxHealth: 5,
+        sprite: "player",
+        health: 10,
+        maxHealth: 20,
         moves: [
           Attack.rush,
           Attack.slice,
@@ -47,14 +47,22 @@ export default {
       const barLength = Math.ceil(
         (this.player.health / this.player.maxHealth) * 20
       );
-      let color = "";
-      if (barLength > 18) color = "red";
-      else if (barLength > 12) color = "yellow";
-      else if (barLength > 0) color = "green";
-
       return {
-        length: barLength,
-        color,
+        green: barLength - 12 > 0 ? 12 : barLength,
+        yellow: barLength - 12 > 0 ? barLength - 12 : 0,
+        red: barLength - 19 >= 0 ? barLength - 17 : 0,
+        neutral: 20 - barLength,
+      };
+    },
+    heatBar() {
+      const barLength = Math.ceil(
+        (this.player.health / this.player.maxHealth) * 20
+      );
+      return {
+        green: barLength - 12 > 0 ? 12 : barLength,
+        yellow: barLength - 12 > 0 ? barLength - 12 : 0,
+        red: barLength - 19 >= 0 ? barLength - 17 : 0,
+        neutral: 20 - barLength,
       };
     },
   },
@@ -232,9 +240,43 @@ export default {
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
-      <div :style="{ color: memoryBar.color }">
-        MEMORY [ {{ "|".repeat(this.memoryBar.length) }}
-        {{ this.player.health }}/{{ this.player.maxHealth }}]
+      <div class="status_bar__item">
+        <span>MEMORY</span>
+        [
+        <span>
+          <span style="color: var(--tris-green)">
+            {{ "|".repeat(this.memoryBar.green) }}
+          </span>
+          <span style="color: yellow">
+            {{ "|".repeat(this.memoryBar.yellow) }}
+          </span>
+          <span style="color: #ff0000">
+            {{ "|".repeat(this.memoryBar.red) }}
+          </span>
+          <span style="color: gray">
+            {{ "|".repeat(this.memoryBar.neutral) }}
+          </span>
+        </span>
+        {{ this.player.health }}/{{ this.player.maxHealth }} ]
+      </div>
+      <div class="status_bar__item">
+        <span>HEAT</span>
+        [
+        <span>
+          <span style="color: var(--tris-green)">
+            {{ "|".repeat(this.memoryBar.green) }}
+          </span>
+          <span style="color: yellow">
+            {{ "|".repeat(this.memoryBar.yellow) }}
+          </span>
+          <span style="color: #ff0000">
+            {{ "|".repeat(this.memoryBar.red) }}
+          </span>
+          <span style="color: gray">
+            {{ "|".repeat(this.memoryBar.neutral) }}
+          </span>
+        </span>
+        {{ this.player.health }}/{{ this.player.maxHealth }} ]
       </div>
     </div>
     <component
@@ -284,8 +326,9 @@ export default {
 #status_bar {
   display: grid;
   grid-template-rows: repeat(2, 1fr);
-  background-color: var(--tris-green);
-  border: solid 0.1rem #28e473;
+  background-color: var(--tris-black);
+  border: solid 0.1rem var(--tris-green);
+  color: var(--tris-green);
   padding: 0.2rem 0.6rem;
 }
 
@@ -293,10 +336,12 @@ export default {
   height: 100%;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: row;
-  gap: 0.5rem;
+  grid-template-columns: 55px;
+  gap: 5px;
+}
+
+.status_bar__item > span:first-child {
+  width: 50px;
 }
 
 :root {
@@ -311,6 +356,7 @@ export default {
 #menu_bar {
   border: solid 1px var(--tris-green);
   padding: 0.2rem 0.6rem;
+  text-transform: uppercase;
 }
 
 main {

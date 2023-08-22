@@ -183,12 +183,20 @@ export default {
         :class="[tile.color]"
         @click="grid_click(tile)"
       >
-        <div class="game_tile-health_bar" v-if="tile.entity">
+        <img
+          v-if="tile.entity.sprite"
+          :src="`/src/assets/entity-${tile.entity.sprite}.svg`"
+          alt="player"
+          class="img-tile"
+        />
+        <div
+          class="game_tile-health_bar"
+          v-if="tile.entity && tile.entity.name !== 'hero'"
+        >
           <span class="game_tile-heart" v-for="health in tile.entity.health">
-            ❤️
+            1024MB
           </span>
         </div>
-        {{ tile.entity ? tile.entity.sprite : "" }}
       </div>
     </div>
   </div>
@@ -199,6 +207,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.img-tile {
+  height: 50%;
+  width: 50%;
+  color: var(--tris-green);
 }
 
 #game_grid {
@@ -219,17 +233,23 @@ export default {
 
 .game_tile-health_bar {
   max-width: 100%;
-  top: calc(0.7rem - 0.5vh);
+  bottom: calc(0.7rem - 0.5vh);
   position: absolute;
-  font-size: calc(0.5rem + 0.2vw);
+  font-size: calc(1rem + 0.2vw);
 }
 
 .blue {
-  background-color: #2a6aff88;
+  background-color: #28e47388;
 }
 
 .red {
-  background-color: #ff362888;
+  color: #ff0000;
+  background-color: #ff000034;
+}
+
+.red > img {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(83%) saturate(4404%)
+    hue-rotate(358deg) brightness(105%) contrast(127%);
 }
 
 .white {
@@ -237,6 +257,7 @@ export default {
 }
 
 .grey {
-  background-color: #565656;
+  /* background-color: #565656; */
+  background-image: url("../assets/tile-wall.svg");
 }
 </style>

@@ -46,6 +46,7 @@ export default {
   align-items: center;
   gap: 1.5rem;
   padding: 0.2rem 0.6rem;
+  text-transform: uppercase;
 }
 
 .move_set__layout > span {
