@@ -29,18 +29,42 @@ export default {
       player: {
         name: "hero",
         type: "player",
-        sprite: "👑",
-        health: 5,
+        sprite: "player",
+        health: 10,
+        maxHealth: 20,
         moves: [
           Attack.rush,
           Attack.slice,
           Attack.explode,
           Attack.locked,
           Attack.locked,
-          Attack.locked,
         ],
       },
     };
+  },
+  computed: {
+    memoryBar() {
+      const barLength = Math.ceil(
+        (this.player.health / this.player.maxHealth) * 20
+      );
+      return {
+        green: barLength - 12 > 0 ? 12 : barLength,
+        yellow: barLength - 12 > 0 ? barLength - 12 : 0,
+        red: barLength - 19 >= 0 ? barLength - 17 : 0,
+        neutral: 20 - barLength,
+      };
+    },
+    heatBar() {
+      const barLength = Math.ceil(
+        (this.player.health / this.player.maxHealth) * 20
+      );
+      return {
+        green: barLength - 12 > 0 ? 12 : barLength,
+        yellow: barLength - 12 > 0 ? barLength - 12 : 0,
+        red: barLength - 19 >= 0 ? barLength - 17 : 0,
+        neutral: 20 - barLength,
+      };
+    },
   },
   methods: {
     resetStage() {
@@ -216,8 +240,44 @@ export default {
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
-      Status Bar | HP: {{ this.player.health }} |
-      {{ this.isPlayerTurn ? "Player Turn" : "Computer Turn" }}
+      <div class="status_bar__item">
+        <span>MEMORY</span>
+        [
+        <span>
+          <span style="color: var(--tris-green)">
+            {{ "|".repeat(this.memoryBar.green) }}
+          </span>
+          <span style="color: yellow">
+            {{ "|".repeat(this.memoryBar.yellow) }}
+          </span>
+          <span style="color: #ff0000">
+            {{ "|".repeat(this.memoryBar.red) }}
+          </span>
+          <span style="color: gray">
+            {{ "|".repeat(this.memoryBar.neutral) }}
+          </span>
+        </span>
+        {{ this.player.health }}/{{ this.player.maxHealth }} ]
+      </div>
+      <div class="status_bar__item">
+        <span>HEAT</span>
+        [
+        <span>
+          <span style="color: var(--tris-green)">
+            {{ "|".repeat(this.memoryBar.green) }}
+          </span>
+          <span style="color: yellow">
+            {{ "|".repeat(this.memoryBar.yellow) }}
+          </span>
+          <span style="color: #ff0000">
+            {{ "|".repeat(this.memoryBar.red) }}
+          </span>
+          <span style="color: gray">
+            {{ "|".repeat(this.memoryBar.neutral) }}
+          </span>
+        </span>
+        {{ this.player.health }}/{{ this.player.maxHealth }} ]
+      </div>
     </div>
     <component
       :is="mainArea"
@@ -229,7 +289,6 @@ export default {
       @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
       :shop-items="shopItems"
     ></component>
-    <div id="combo_bar">Combo Bar</div>
     <MoveSet
       :moves="this.player.moves"
       @selectedMove="(move) => selectMove(move)"
@@ -264,16 +323,29 @@ export default {
   cursor: pointer;
 }
 
+#status_bar {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  background-color: var(--tris-black);
+  border: solid 0.1rem var(--tris-green);
+  color: var(--tris-green);
+  padding: 0.2rem 0.6rem;
+}
+
+.status_bar__item {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  grid-template-columns: 55px;
+  gap: 5px;
+}
+
+.status_bar__item > span:first-child {
+  width: 50px;
+}
+
 :root {
   --real100vh: 100vh;
-}
-
-div {
-  border: solid black 1px;
-}
-
-#spacer {
-  border: none;
 }
 
 .rounded_moveset {
@@ -281,34 +353,38 @@ div {
   overflow: hidden;
 }
 
+#menu_bar {
+  border: solid 1px var(--tris-green);
+  padding: 0.2rem 0.6rem;
+  text-transform: uppercase;
+}
+
 main {
   height: var(--real100vh);
-  overflow: hidden;
-  color: black;
-  display: grid;
   padding: 0.3rem;
+  display: grid;
   gap: 0.2rem;
-  background-color: white;
+  overflow: hidden;
+  background-color: var(--tris-black);
+  color: var(--tris-green);
 }
 
 .mobile_layout {
-  grid-template-rows: 1fr 2fr 23fr 1fr 12fr 1fr;
+  grid-template-rows: 1fr 2fr 23fr 14fr 1fr;
   grid-template-areas:
     "menu_bar"
     "status_bar"
     "game_area"
-    "combo_bar"
     "move_set"
     "spacer";
 }
 
 .desktop_layout {
-  grid-template-rows: 1fr 2fr 23fr 1fr 12fr;
+  grid-template-rows: 1fr 2fr 23fr 12fr;
   grid-template-areas:
     "menu_bar"
     "status_bar"
     "game_area"
-    "combo_bar"
     "move_set";
 }
 </style>
