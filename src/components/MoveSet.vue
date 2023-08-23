@@ -2,6 +2,7 @@
 export default {
   props: {
     moves: Array,
+    isSelecting: Boolean,
   },
   emits: ["selectedMove"],
   methods: {
@@ -15,7 +16,7 @@ export default {
 </script>
 
 <template>
-  <div id="move_set">
+  <div id="move_set" :class="{ isShopping: isSelecting }">
     <div class="move_set__header move_set__layout">
       <span>MOVE</span><span>MEMORY</span><span>HEAT</span>
     </div>
@@ -38,6 +39,10 @@ export default {
   grid-auto-flow: column;
   grid-template-rows: repeat(6, 1fr);
   gap: 0.2rem;
+}
+
+.isShopping {
+  outline: solid 1px var(--tris-green);
 }
 
 .move_set__layout {

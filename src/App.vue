@@ -15,7 +15,7 @@ export default {
   data() {
     return {
       gameMode: "play",
-      mainArea: "GameArea",
+      mainArea: "ShopArea",
       stageNumber: 2,
       shopLeft: 1,
       shopItems: [],
@@ -185,27 +185,20 @@ export default {
       this.shopLeft = 3;
     },
     selectShopItem(shopItem) {
-      this.isSelecting = true;
-      this.selectedItem = shopItem;
-      if (shopItem === 9) {
+      this.isSelecting = false;
+      this.selectedItem = -1;
+
+      if (shopItem === "exit") {
         this.exitShop();
+        return;
+      }
+      if (shopItem >= 0) {
+        this.isSelecting = true;
+        this.selectedItem = shopItem;
       }
     },
     generateShopItems() {
-      return [
-        Attack.longRush,
-        Attack.longSlice,
-        Attack.smallExplode,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        {
-          name: "exit",
-        },
-      ];
+      return [Attack.longRush, Attack.longSlice, Attack.smallExplode];
     },
   },
   created() {
@@ -293,6 +286,7 @@ export default {
       :moves="this.player.moves"
       @selectedMove="(move) => selectMove(move)"
       :class="[isMobile ? 'rounded_moveset' : '']"
+      :isSelecting="this.isSelecting"
     ></MoveSet>
     <div id="spacer" v-if="isMobile"></div>
   </main>

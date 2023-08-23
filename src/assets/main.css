@@ -1,7 +1,8 @@
-@import './base.css';
+@import "./base.css";
 
 #app {
   font-weight: normal;
+  user-select: none;
 }
 
 a {
@@ -29,6 +30,6 @@ a {
 
 @supports (height: 100dvh) {
   :root {
-      --unit-100vh: 100dvh;
+    --unit-100vh: 100dvh;
   }
 }
