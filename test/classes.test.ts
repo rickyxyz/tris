@@ -83,7 +83,7 @@ describe("Move.getClickableArea", () => {
 });
 
 describe("Move.execute", () => {
-  it("attacking enemy should reduce enemy health", () => {
+  it("attacking enemy should reduce enemy memory", () => {
     Move.execute(
       testStage2,
       "player",
@@ -98,6 +98,6 @@ describe("Move.execute", () => {
       },
       { x: 2, y: 2 }
     );
-    expect(testStage2.entities[0].health).toBe(1);
+    expect(testStage2.entities[0].memory).toBe(1);
   });
 });

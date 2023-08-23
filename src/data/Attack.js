@@ -7,7 +7,6 @@ export default {
       range: 0,
       damage: 0,
     },
-    cooldown: -1
   },
   locked: {
     name: "locked",
@@ -17,7 +16,6 @@ export default {
       range: 0,
       damage: 0,
     },
-    cooldown: -1,
   },
   rush: {
     name: "rush",
@@ -27,8 +25,6 @@ export default {
       range: 2,
       damage: 1,
     },
-    cooldown: 2,
-    timer: 0,
   },
   slice: {
     name: "slice",
@@ -38,8 +34,6 @@ export default {
       range: 2,
       damage: 1,
     },
-    cooldown: 2,
-    timer: 0,
   },
   explode: {
     name: "explode",
@@ -49,8 +43,6 @@ export default {
       range: 2,
       damage: 1,
     },
-    cooldown: 2,
-    timer: 0,
   },
   longRush: {
     name: "long rush",
@@ -60,8 +52,6 @@ export default {
       range: 3,
       damage: 1,
     },
-    cooldown: 2,
-    timer: 0,
   },
   longSlice: {
     name: "long slice",
@@ -71,8 +61,6 @@ export default {
       range: 3,
       damage: 1,
     },
-    cooldown: 2,
-    timer: 0,
   },
   smallExplode: {
     name: "small explode",
@@ -82,7 +70,5 @@ export default {
       range: 2,
       damage: 2,
     },
-    cooldown: 2,
-    timer: 0,
   },
 };

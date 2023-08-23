@@ -30,8 +30,8 @@ export default {
         name: "hero",
         type: "player",
         sprite: "player",
-        health: 10,
-        maxHealth: 20,
+        memory: 10,
+        maxMemory: 20,
         moves: [
           Attack.rush,
           Attack.slice,
@@ -45,7 +45,7 @@ export default {
   computed: {
     memoryBar() {
       const barLength = Math.ceil(
-        (this.player.health / this.player.maxHealth) * 20
+        (this.player.memory / this.player.maxMemory) * 20
       );
       return {
         green: barLength - 12 > 0 ? 12 : barLength,
@@ -56,7 +56,7 @@ export default {
     },
     heatBar() {
       const barLength = Math.ceil(
-        (this.player.health / this.player.maxHealth) * 20
+        (this.player.memory / this.player.maxMemory) * 20
       );
       return {
         green: barLength - 12 > 0 ? 12 : barLength,
@@ -68,7 +68,7 @@ export default {
   },
   methods: {
     resetStage() {
-      this.player.health = 1;
+      this.player.memory = 1;
       this.gameMode = "play";
     },
     determineDeviceType() {
@@ -87,12 +87,8 @@ export default {
     },
     switchTurn() {
       this.isPlayerTurn = !this.isPlayerTurn;
-      if (this.isPlayerTurn)
-        for (const move of this.player.moves) {
-          if (move.timer > 0) move.timer--;
-        }
       this.selectMove(-1);
-      if (this.player.health <= 0) this.gameMode = "game over";
+      if (this.player.memory <= 0) this.gameMode = "game over";
     },
     generateStage(player, level) {
       let entityCounter = 0;
@@ -148,9 +144,6 @@ export default {
     switchStage() {
       this.currentStage = Level[this.level.nextLevel];
       this.isPlayerTurn = true;
-      for (const move of this.player.moves) {
-        move.timer = 0;
-      }
       this.level = this.generateStage(this.player, this.currentStage);
       this.selectMove(-1);
       this.stageNumber++;
@@ -250,7 +243,7 @@ export default {
             {{ "|".repeat(this.memoryBar.neutral) }}
           </span>
         </span>
-        {{ this.player.health }}/{{ this.player.maxHealth }} ]
+        {{ this.player.memory }}/{{ this.player.maxMemory }} ]
       </div>
       <div class="status_bar__item">
         <span>HEAT</span>
@@ -269,7 +262,7 @@ export default {
             {{ "|".repeat(this.memoryBar.neutral) }}
           </span>
         </span>
-        {{ this.player.health }}/{{ this.player.maxHealth }} ]
+        {{ this.player.memory }}/{{ this.player.maxMemory }} ]
       </div>
     </div>
     <component

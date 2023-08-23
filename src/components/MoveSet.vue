@@ -7,9 +7,7 @@ export default {
   emits: ["selectedMove"],
   methods: {
     selectMove(idx) {
-      if (this.moves[idx].cooldown < 0 || this.moves[idx].timer <= 0) {
-        this.$emit("selectedMove", idx);
-      }
+      this.$emit("selectedMove", idx);
     },
   },
 };
@@ -27,7 +25,6 @@ export default {
       class="move_set__layout"
     >
       <span>{{ move.name }}</span>
-      <span>{{ move.timer }}</span>
       <span>+10%</span>
     </div>
   </div>
