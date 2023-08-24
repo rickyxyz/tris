@@ -5,14 +5,14 @@ export default {
     name: "Sauropod",
     type: "enemy",
     sprite: "enemy1",
-    memory: 2,
+    health: 2,
     moves: [Attack.slice],
   },
   t_rex: {
     name: "T-rex",
     type: "enemy",
     sprite: "enemy1",
-    memory: 1,
+    health: 1,
     moves: [Attack.rush],
   },
 };

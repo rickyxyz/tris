@@ -217,7 +217,7 @@ export function execute(level, entityID, move, targetCoordinate) {
         tileMap[clickedTileIndex].entity = user;
         user.coordinate = targetTile.coordinate;
       } else {
-        if (targetTile.entity.memory > action.damage) {
+        if (targetTile.entity.health > action.damage) {
           const collisionResult = calculateCollisionResult(
             user.coordinate,
             targetTile.coordinate
@@ -225,10 +225,10 @@ export function execute(level, entityID, move, targetCoordinate) {
           const collisionResultIndex = coordinateToIndex(collisionResult, size);
           tileMap[collisionResultIndex].entity = user;
           user.coordinate = collisionResult;
-          targetTile.entity.memory = targetTile.entity.memory - action.damage;
+          targetTile.entity.health = targetTile.entity.health - action.damage;
         } else {
           user.coordinate = targetTile.coordinate;
-          targetTile.entity.memory = 0;
+          targetTile.entity.health = 0;
           tileMap[clickedTileIndex].entity = user;
         }
       }
@@ -242,8 +242,8 @@ export function execute(level, entityID, move, targetCoordinate) {
           Object.keys(tileEntity).length !== 0 ||
           tileEntity.constructor !== Object
         ) {
-          tileEntity.memory -= action.damage;
-          if (tileEntity.memory <= 0) {
+          tileEntity.health -= action.damage;
+          if (tileEntity.health <= 0) {
             tileMap[idx].entity = {};
           }
         }

@@ -15,7 +15,7 @@ export default {
   data() {
     return {
       gameMode: "play",
-      mainArea: "ShopArea",
+      mainArea: "GameArea",
       stageNumber: 2,
       shopLeft: 1,
       shopItems: [],
@@ -30,8 +30,8 @@ export default {
         name: "hero",
         type: "player",
         sprite: "player",
-        memory: 10,
-        maxMemory: 20,
+        health: 10,
+        maxHealth: 20,
         moves: [
           Attack.rush,
           Attack.slice,
@@ -43,9 +43,12 @@ export default {
     };
   },
   computed: {
-    memoryBar() {
+    isGameOver() {
+      return this.player.health <= 0;
+    },
+    healthBar() {
       const barLength = Math.ceil(
-        (this.player.memory / this.player.maxMemory) * 20
+        (this.player.health / this.player.maxHealth) * 20
       );
       return {
         green: barLength - 12 > 0 ? 12 : barLength,
@@ -56,7 +59,7 @@ export default {
     },
     heatBar() {
       const barLength = Math.ceil(
-        (this.player.memory / this.player.maxMemory) * 20
+        (this.player.health / this.player.maxHealth) * 20
       );
       return {
         green: barLength - 12 > 0 ? 12 : barLength,
@@ -67,10 +70,6 @@ export default {
     },
   },
   methods: {
-    resetStage() {
-      this.player.memory = 1;
-      this.gameMode = "play";
-    },
     determineDeviceType() {
       let value = "100vh";
       if (window.innerWidth && window.innerWidth <= 1100) {
@@ -88,7 +87,6 @@ export default {
     switchTurn() {
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
-      if (this.player.memory <= 0) this.gameMode = "game over";
     },
     generateStage(player, level) {
       let entityCounter = 0;
@@ -227,42 +225,42 @@ export default {
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
       <div class="status_bar__item">
-        <span>MEMORY</span>
+        <span>HEALTH</span>
         [
         <span>
           <span style="color: var(--tris-green)">
-            {{ "|".repeat(this.memoryBar.green) }}
+            {{ "|".repeat(this.healthBar.green) }}
           </span>
           <span style="color: yellow">
-            {{ "|".repeat(this.memoryBar.yellow) }}
+            {{ "|".repeat(this.healthBar.yellow) }}
           </span>
           <span style="color: #ff0000">
-            {{ "|".repeat(this.memoryBar.red) }}
+            {{ "|".repeat(this.healthBar.red) }}
           </span>
           <span style="color: gray">
-            {{ "|".repeat(this.memoryBar.neutral) }}
+            {{ "|".repeat(this.healthBar.neutral) }}
           </span>
         </span>
-        {{ this.player.memory }}/{{ this.player.maxMemory }} ]
+        {{ this.player.health }}/{{ this.player.maxHealth }} ]
       </div>
       <div class="status_bar__item">
         <span>HEAT</span>
         [
         <span>
           <span style="color: var(--tris-green)">
-            {{ "|".repeat(this.memoryBar.green) }}
+            {{ "|".repeat(this.healthBar.green) }}
           </span>
           <span style="color: yellow">
-            {{ "|".repeat(this.memoryBar.yellow) }}
+            {{ "|".repeat(this.healthBar.yellow) }}
           </span>
           <span style="color: #ff0000">
-            {{ "|".repeat(this.memoryBar.red) }}
+            {{ "|".repeat(this.healthBar.red) }}
           </span>
           <span style="color: gray">
-            {{ "|".repeat(this.memoryBar.neutral) }}
+            {{ "|".repeat(this.healthBar.neutral) }}
           </span>
         </span>
-        {{ this.player.memory }}/{{ this.player.maxMemory }} ]
+        {{ this.player.health }}/{{ this.player.maxHealth }} ]
       </div>
     </div>
     <component

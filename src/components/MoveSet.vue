@@ -16,7 +16,7 @@ export default {
 <template>
   <div id="move_set" :class="{ isShopping: isSelecting }">
     <div class="move_set__header move_set__layout">
-      <span>MOVE</span><span>MEMORY</span><span>HEAT</span>
+      <span>MOVE</span><span>health</span><span>HEAT</span>
     </div>
     <div
       v-for="(move, idx) in this.moves"

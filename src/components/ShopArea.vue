@@ -26,7 +26,7 @@ export default {
     >
       <div class="shop_item__header">
         <span>{{ shopItem.name ?? idx }}</span>
-        <span>MEMORY</span>
+        <span>health</span>
         <span>HEAT</span>
       </div>
       <div class="shop_item__description">

@@ -101,7 +101,7 @@ export default {
       let endStage = true;
       for (const index in this.entities) {
         const entity = this.entities[index];
-        if (entity.memory <= 0 || entity.entityID === "player") {
+        if (entity.health <= 0 || entity.entityID === "player") {
           continue;
         }
         endStage = false;
@@ -188,10 +188,10 @@ export default {
           class="img-tile"
         />
         <div
-          class="game_tile-memory_bar"
+          class="game_tile-health_bar"
           v-if="tile.entity && tile.entity.name !== 'hero'"
         >
-          <span class="game_tile-heart" v-for="memory in tile.entity.memory">
+          <span class="game_tile-heart" v-for="health in tile.entity.health">
             1024MB
           </span>
         </div>
@@ -229,7 +229,7 @@ export default {
   flex-direction: column;
 }
 
-.game_tile-memory_bar {
+.game_tile-health_bar {
   max-width: 100%;
   bottom: calc(0.7rem - 0.5vh);
   position: absolute;

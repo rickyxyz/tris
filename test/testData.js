@@ -6,7 +6,7 @@ export const testPlayer = {
   type: "player",
   coordinate: { x: 2, y: 2 },
   sprite: "👑",
-  memory: 3,
+  health: 3,
   moves: [Attack.rush, Attack.slice, Attack.explode],
 };
 
