@@ -78,8 +78,7 @@ export default {
               break;
           }
 
-          this.level.tileMap[idx].color =
-            tileColorMap[newMove.action.type][tileType];
+          this.level.tileMap[idx].color = tileColorMap[newMove.type][tileType];
           this.possibleMoves.push(idx);
         }
       }

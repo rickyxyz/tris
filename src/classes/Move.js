@@ -4,8 +4,8 @@ let possibleMovesCache = [];
 
 export function getClickableArea(level, entityID, move) {
   const { x, y } = level.entities[entityID].coordinate;
-  const shape = move.action.direction;
-  const range = move.action.range;
+  const shape = move.direction;
+  const range = move.range;
   const tileMap = level.tileMap;
   const bound = level.size;
   let possibleMoves = [];
@@ -204,20 +204,19 @@ export function getClickableArea(level, entityID, move) {
 export function execute(level, entityID, move, targetCoordinate) {
   const tileMap = level.tileMap;
   const user = level.entities[entityID];
-  const action = move.action;
   const size = Math.sqrt(Object.keys(tileMap).length);
   const userIndex = coordinateToIndex(user.coordinate, size);
   const clickedTileIndex = coordinateToIndex(targetCoordinate, size);
   const targetTile = tileMap[clickedTileIndex];
 
-  switch (action.type) {
+  switch (move.type) {
     case "attack":
       tileMap[userIndex].entity = {};
       if (Object.keys(targetTile.entity).length === 0) {
         tileMap[clickedTileIndex].entity = user;
         user.coordinate = targetTile.coordinate;
       } else {
-        if (targetTile.entity.health > action.damage) {
+        if (targetTile.entity.health > move.damage) {
           const collisionResult = calculateCollisionResult(
             user.coordinate,
             targetTile.coordinate
@@ -225,7 +224,7 @@ export function execute(level, entityID, move, targetCoordinate) {
           const collisionResultIndex = coordinateToIndex(collisionResult, size);
           tileMap[collisionResultIndex].entity = user;
           user.coordinate = collisionResult;
-          targetTile.entity.health = targetTile.entity.health - action.damage;
+          targetTile.entity.health = targetTile.entity.health - move.damage;
         } else {
           user.coordinate = targetTile.coordinate;
           targetTile.entity.health = 0;
@@ -242,7 +241,7 @@ export function execute(level, entityID, move, targetCoordinate) {
           Object.keys(tileEntity).length !== 0 ||
           tileEntity.constructor !== Object
         ) {
-          tileEntity.health -= action.damage;
+          tileEntity.health -= move.damage;
           if (tileEntity.health <= 0) {
             tileMap[idx].entity = {};
           }
