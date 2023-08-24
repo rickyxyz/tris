@@ -1,7 +1,6 @@
 export default {
   neutral: {
     name: "neutral",
-
     type: "neutral",
     direction: "plus",
     range: 0,
@@ -9,7 +8,6 @@ export default {
   },
   locked: {
     name: "locked",
-
     type: "neutral",
     direction: "plus",
     range: 0,
@@ -17,7 +15,6 @@ export default {
   },
   rush: {
     name: "rush",
-
     type: "attack",
     direction: "plus",
     range: 2,
@@ -25,7 +22,6 @@ export default {
   },
   slice: {
     name: "slice",
-
     type: "attack",
     direction: "cross",
     range: 2,
@@ -33,7 +29,6 @@ export default {
   },
   explode: {
     name: "explode",
-
     type: "collateral",
     direction: "radius",
     range: 2,
@@ -41,7 +36,6 @@ export default {
   },
   longRush: {
     name: "long rush",
-
     type: "attack",
     direction: "plus",
     range: 3,
@@ -49,7 +43,6 @@ export default {
   },
   longSlice: {
     name: "long slice",
-
     type: "attack",
     direction: "cross",
     range: 3,
@@ -57,7 +50,6 @@ export default {
   },
   smallExplode: {
     name: "small explode",
-
     type: "collateral",
     direction: "radius",
     range: 2,
