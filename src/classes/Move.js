@@ -209,6 +209,10 @@ export function execute(level, entityID, move, targetCoordinate) {
   const clickedTileIndex = coordinateToIndex(targetCoordinate, size);
   const targetTile = tileMap[clickedTileIndex];
 
+  if (user.type === "player") {
+    user.health -= move.damage;
+  }
+
   switch (move.type) {
     case "attack":
       tileMap[userIndex].entity = {};
@@ -229,6 +233,9 @@ export function execute(level, entityID, move, targetCoordinate) {
           user.coordinate = targetTile.coordinate;
           targetTile.entity.health = 0;
           tileMap[clickedTileIndex].entity = user;
+          if (user.type === "player") {
+            user.health += targetTile.entity.maxHealth;
+          }
         }
       }
       break;

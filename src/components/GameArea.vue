@@ -191,7 +191,7 @@ export default {
           v-if="tile.entity && tile.entity.name !== 'hero'"
         >
           <span class="game_tile-heart" v-if="tile.entity.health">
-            [{{ tile.entity.health }}]
+            [{{ tile.entity.health }} / {{ tile.entity.maxHealth }}]
           </span>
         </div>
       </div>

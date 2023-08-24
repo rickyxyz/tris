@@ -25,7 +25,7 @@ export default {
       class="move_set__layout"
     >
       <span>{{ move.name }}</span>
-      <span>+10%</span>
+      <span>-{{ move.damage }}</span>
     </div>
   </div>
 </template>
