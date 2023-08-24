@@ -190,8 +190,8 @@ export default {
           class="game_tile-health_bar"
           v-if="tile.entity && tile.entity.name !== 'hero'"
         >
-          <span class="game_tile-heart" v-for="health in tile.entity.health">
-            1024MB
+          <span class="game_tile-heart" v-if="tile.entity.health">
+            [{{ tile.entity.health }}]
           </span>
         </div>
       </div>
@@ -230,9 +230,9 @@ export default {
 
 .game_tile-health_bar {
   max-width: 100%;
-  bottom: calc(0.7rem - 0.5vh);
+  bottom: calc(0.2rem - 0.5vh);
   position: absolute;
-  font-size: calc(1rem + 0.2vw);
+  font-size: calc(1.2rem + 0.2vw);
 }
 
 .blue {
