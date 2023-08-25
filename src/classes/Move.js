@@ -211,6 +211,7 @@ export function execute(level, entityID, move, targetCoordinate) {
 
   if (user.type === "player") {
     user.health -= move.damage;
+    user.heat += move.heat;
   }
 
   switch (move.type) {

@@ -19,6 +19,7 @@ export default {
     direction: "plus",
     range: 2,
     damage: 1,
+    heat: 5,
   },
   slice: {
     name: "slice",
@@ -26,13 +27,15 @@ export default {
     direction: "cross",
     range: 2,
     damage: 1,
+    heat: 5,
   },
   explode: {
     name: "explode",
     type: "collateral",
     direction: "radius",
     range: 2,
-    damage: 1,
+    damage: 10,
+    heat: 5,
   },
   longRush: {
     name: "long rush",
@@ -40,6 +43,7 @@ export default {
     direction: "plus",
     range: 3,
     damage: 1,
+    heat: 5,
   },
   longSlice: {
     name: "long slice",
@@ -47,6 +51,7 @@ export default {
     direction: "cross",
     range: 3,
     damage: 1,
+    heat: 5,
   },
   smallExplode: {
     name: "small explode",
@@ -54,5 +59,6 @@ export default {
     direction: "radius",
     range: 2,
     damage: 2,
+    heat: 5,
   },
 };

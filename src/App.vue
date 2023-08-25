@@ -30,8 +30,10 @@ export default {
         name: "hero",
         type: "player",
         sprite: "player",
-        health: 10,
-        maxHealth: 20,
+        health: 2,
+        maxHealth: 10,
+        heat: 10,
+        maxHeat: 20,
         moves: [
           Attack.rush,
           Attack.slice,
@@ -51,21 +53,23 @@ export default {
         (this.player.health / this.player.maxHealth) * 20
       );
       return {
-        green: barLength - 12 > 0 ? 12 : barLength,
-        yellow: barLength - 12 > 0 ? barLength - 12 : 0,
-        red: barLength - 19 >= 0 ? barLength - 17 : 0,
+        green: barLength,
         neutral: 20 - barLength,
       };
     },
     heatBar() {
       const barLength = Math.ceil(
-        (this.player.health / this.player.maxHealth) * 20
+        (this.player.heat / this.player.maxHeat) * 20
       );
+      const green = Math.min(barLength, 12);
+      const yellow = Math.min(barLength - green, 6);
+      const red = Math.max(barLength - green - yellow, 0);
+      const neutral = 20 - barLength;
       return {
-        green: barLength - 12 > 0 ? 12 : barLength,
-        yellow: barLength - 12 > 0 ? barLength - 12 : 0,
-        red: barLength - 19 >= 0 ? barLength - 17 : 0,
-        neutral: 20 - barLength,
+        green,
+        yellow,
+        red,
+        neutral,
       };
     },
   },
@@ -85,8 +89,16 @@ export default {
           Math.abs(window.innerHeight - window.innerWidth) > 300);
     },
     switchTurn() {
+      if (this.player.health <= 0) {
+        this.gameMode = "game over";
+        this.isPlayerTurn = true;
+        return;
+      }
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
+      if (this.isPlayerTurn) {
+        this.player.heat = Math.max(0, this.player.heat - 5);
+      }
     },
     generateStage(player, level) {
       let entityCounter = 0;
@@ -225,17 +237,11 @@ export default {
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
       <div class="status_bar__item">
-        <span>HEALTH</span>
+        <span>HEATLH</span>
         [
         <span>
           <span style="color: var(--tris-green)">
             {{ "|".repeat(this.healthBar.green) }}
-          </span>
-          <span style="color: yellow">
-            {{ "|".repeat(this.healthBar.yellow) }}
-          </span>
-          <span style="color: #ff0000">
-            {{ "|".repeat(this.healthBar.red) }}
           </span>
           <span style="color: gray">
             {{ "|".repeat(this.healthBar.neutral) }}
@@ -248,19 +254,19 @@ export default {
         [
         <span>
           <span style="color: var(--tris-green)">
-            {{ "|".repeat(this.healthBar.green) }}
+            {{ "|".repeat(this.heatBar.green) }}
           </span>
           <span style="color: yellow">
-            {{ "|".repeat(this.healthBar.yellow) }}
+            {{ "|".repeat(this.heatBar.yellow) }}
           </span>
           <span style="color: #ff0000">
-            {{ "|".repeat(this.healthBar.red) }}
+            {{ "|".repeat(this.heatBar.red) }}
           </span>
           <span style="color: gray">
-            {{ "|".repeat(this.healthBar.neutral) }}
+            {{ "|".repeat(this.heatBar.neutral) }}
           </span>
         </span>
-        {{ this.player.health }}/{{ this.player.maxHealth }} ]
+        {{ this.player.heat }}/{{ this.player.maxHeat }}&deg;C ]
       </div>
     </div>
     <component
@@ -275,7 +281,10 @@ export default {
     ></component>
     <MoveSet
       :moves="this.player.moves"
+      :player="player"
+      :isPlayerTurn="isPlayerTurn"
       @selectedMove="(move) => selectMove(move)"
+      @endTurn="switchTurn()"
       :class="[isMobile ? 'rounded_moveset' : '']"
       :isSelecting="this.isSelecting"
     ></MoveSet>
