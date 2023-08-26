@@ -1,0 +1,48 @@
+<script lang="ts">
+export default {
+  props: { gameMode: String },
+  emits: ["start", "reset"],
+};
+</script>
+
+<template>
+  <div
+    class="screen-background"
+    v-if="gameMode !== 'play' && gameMode !== 'shop'"
+  >
+    <div class="screen-title" v-if="gameMode === 'main menu'">
+      <h1>TITLE</h1>
+      <h2 @click="this.$emit('start')">Start</h2>
+    </div>
+    <div class="screen-gameover" v-if="gameMode === 'game over'">
+      <h1>GAME OVER</h1>
+      <h2 @click="this.$emit('reset')">RETRY</h2>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.screen-background {
+  color: white;
+  background-color: black;
+  z-index: 2;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 30vh;
+}
+
+.screen-background > div {
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;
+}
+
+.screen-background > div > h2 {
+  cursor: pointer;
+}
+</style>

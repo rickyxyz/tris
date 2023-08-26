@@ -2,6 +2,7 @@
 import GameArea from "./components/GameArea.vue";
 import ShopArea from "./components/ShopArea.vue";
 import MoveSet from "./components/MoveSet.vue";
+import MenuScreen from "./components/MenuScreen.vue";
 import Attack from "./data/Attack.js";
 import { Level, tileDictionary } from "./data/Level";
 import { coordinateToIndex } from "./utils/Utils";
@@ -11,10 +12,11 @@ export default {
     GameArea,
     MoveSet,
     ShopArea,
+    MenuScreen,
   },
   data() {
     return {
-      gameMode: "play",
+      gameMode: "main menu",
       mainArea: "GameArea",
       stageNumber: 2,
       shopLeft: 1,
@@ -45,9 +47,6 @@ export default {
     };
   },
   computed: {
-    isGameOver() {
-      return this.player.health <= 0;
-    },
     healthBar() {
       const barLength = Math.ceil(
         (this.player.health / this.player.maxHealth) * 20
@@ -74,6 +73,17 @@ export default {
     },
   },
   methods: {
+    resetGame() {
+      this.player.health = 2;
+      this.currentStage = Level.level_01;
+      this.isSelecting = false;
+      this.selectedMoveIndex = -1;
+      this.level = this.generateStage(this.player, this.currentStage);
+      this.player = this.level.entities.player;
+      this.mainArea = "GameArea";
+      this.gameMode = "play";
+      this.isPlayerTurn = true;
+    },
     determineDeviceType() {
       let value = "100vh";
       if (window.innerWidth && window.innerWidth <= 1100) {
@@ -220,19 +230,11 @@ export default {
 </script>
 
 <template>
-  <div
-    class="screen-background"
-    v-if="gameMode !== 'play' && gameMode !== 'shop'"
-  >
-    <div class="screen-title" v-if="gameMode === 'main menu'">
-      <h1>TITLE</h1>
-      <h2 @click="this.gameMode = 'play'">Start</h2>
-    </div>
-    <div class="screen-gameover" v-if="gameMode === 'game over'">
-      <h1>GAME OVER</h1>
-      <h2 @click="this.resetStage">RETRY</h2>
-    </div>
-  </div>
+  <MenuScreen
+    :game-mode="gameMode"
+    @start="this.gameMode = 'play'"
+    @reset="this.resetGame()"
+  ></MenuScreen>
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
     <div id="status_bar">
@@ -293,30 +295,6 @@ export default {
 </template>
 
 <style scoped>
-.screen-background {
-  color: white;
-  background-color: black;
-  z-index: 2;
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding-top: 30vh;
-}
-
-.screen-background > div {
-  cursor: default;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5rem;
-}
-
-.screen-background > div > h2 {
-  cursor: pointer;
-}
-
 #status_bar {
   display: grid;
   grid-template-rows: repeat(2, 1fr);
