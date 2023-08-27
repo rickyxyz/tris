@@ -55,6 +55,11 @@ export default {
             empty: "red",
             enemy: "red",
           },
+          self: {
+            self: "blue",
+            empty: "white",
+            enemy: "white",
+          },
         };
 
         const newMove = this.player.moves[this.selectedMove];

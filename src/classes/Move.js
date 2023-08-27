@@ -8,6 +8,7 @@ export function getClickableArea(level, entityID, move) {
   const range = move.range;
   const tileMap = level.tileMap;
   const bound = level.size;
+
   let possibleMoves = [];
 
   function calculateDirectionalMove(
@@ -235,7 +236,10 @@ export function execute(level, entityID, move, targetCoordinate) {
           targetTile.entity.health = 0;
           tileMap[clickedTileIndex].entity = user;
           if (user.type === "player") {
-            user.health += targetTile.entity.maxHealth;
+            user.health = Math.min(
+              user.health + targetTile.entity.maxHealth,
+              user.maxHealth
+            );
           }
         }
       }

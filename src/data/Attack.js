@@ -5,6 +5,7 @@ export default {
     direction: "plus",
     range: 0,
     damage: 0,
+    description: "",
   },
   locked: {
     name: "locked",
@@ -12,6 +13,7 @@ export default {
     direction: "plus",
     range: 0,
     damage: 0,
+    description: "",
   },
   rush: {
     name: "rush",
@@ -20,6 +22,7 @@ export default {
     range: 2,
     damage: 1,
     heat: 5,
+    description: "Attack enemy in a plus shaped area",
   },
   slice: {
     name: "slice",
@@ -28,6 +31,7 @@ export default {
     range: 2,
     damage: 1,
     heat: 5,
+    description: "Attack enemy in a cross shaped area",
   },
   explode: {
     name: "explode",
@@ -36,6 +40,7 @@ export default {
     range: 2,
     damage: 10,
     heat: 5,
+    description: "Damage all entities in a radius",
   },
   longRush: {
     name: "long rush",
@@ -44,21 +49,24 @@ export default {
     range: 3,
     damage: 1,
     heat: 5,
+    description: "Attack enemy in a plus shaped area",
   },
-  longSlice: {
-    name: "long slice",
-    type: "attack",
-    direction: "cross",
-    range: 3,
-    damage: 1,
-    heat: 5,
-  },
-  smallExplode: {
-    name: "small explode",
-    type: "collateral",
+  heal: {
+    name: "heal",
+    type: "self",
     direction: "radius",
-    range: 2,
-    damage: 2,
-    heat: 5,
+    range: 0,
+    damage: -5,
+    heat: 10,
+    description: "Heal with the cost of heat",
+  },
+  heatDischarge: {
+    name: "Heat Discharge",
+    type: "self",
+    direction: "radius",
+    range: 0,
+    damage: 5,
+    heat: -20,
+    description: "Reduce heat with the cost of health",
   },
 };

@@ -26,13 +26,15 @@ export default {
     >
       <div class="shop_item__header">
         <span>{{ shopItem.name ?? idx }}</span>
-        <span>health</span>
-        <span>HEAT</span>
       </div>
       <div class="shop_item__description">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente
-        consequatur magni ipsum vero doloribus vel odio dolore earum, explicabo
-        tempora!
+        {{ shopItem.description }}<br />
+        {{
+          `${
+            shopItem.damage > 0 ? "DAMAGE&nbsp;" : "HEAL&nbsp;&nbsp;&nbsp;"
+          }: ${shopItem.damage}`
+        }}<br />
+        {{ `HEAT&nbsp;&nbsp;&nbsp;: ${shopItem.heat}` }}&deg;C
       </div>
     </div>
     <div class="shop_item__exit" @click="this.selectItem('exit')">EXIT</div>
@@ -61,9 +63,6 @@ export default {
 
 .shop_item__header {
   border-bottom: 1px solid var(--tris-green);
-  display: grid;
-  grid-template-columns: auto 60px 60px;
-  gap: 10px;
   text-transform: uppercase;
   align-items: center;
 }

@@ -28,8 +28,8 @@ export default {
   },
   methods: {
     selectMove(idx) {
-      this.isActive = this.isActive === idx ? -1 : idx;
-      if (this.moves[idx].isUsable) {
+      this.isActive = this.isActive === idx || this.isSelecting ? -1 : idx;
+      if (this.moves[idx].isUsable || this.isSelecting) {
         this.$emit("selectedMove", idx);
       }
     },
@@ -59,8 +59,8 @@ export default {
       "
     >
       <span>{{ move.name }}</span>
-      <span>-{{ move.damage }}</span>
-      <span>+{{ move.heat }}&deg;C</span>
+      <span>{{ move.damage * -1 }}</span>
+      <span>{{ move.heat }}&deg;C</span>
     </div>
   </div>
 </template>

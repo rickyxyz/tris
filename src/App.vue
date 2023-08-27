@@ -32,9 +32,9 @@ export default {
         name: "hero",
         type: "player",
         sprite: "player",
-        health: 2,
+        health: 10,
         maxHealth: 10,
-        heat: 10,
+        heat: 0,
         maxHeat: 20,
         moves: [
           Attack.rush,
@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     resetGame() {
-      this.player.health = 2;
+      this.player.health = 10;
       this.currentStage = Level.level_01;
       this.isSelecting = false;
       this.selectedMoveIndex = -1;
@@ -162,6 +162,8 @@ export default {
       };
     },
     switchStage() {
+      this.player.health = this.player.maxHealth;
+      this.player.heat = 0;
       this.currentStage = Level[this.level.nextLevel];
       this.isPlayerTurn = true;
       this.level = this.generateStage(this.player, this.currentStage);
@@ -211,7 +213,7 @@ export default {
       }
     },
     generateShopItems() {
-      return [Attack.longRush, Attack.longSlice, Attack.smallExplode];
+      return [Attack.heal, Attack.heatDischarge, Attack.longRush];
     },
   },
   created() {
@@ -249,7 +251,7 @@ export default {
             {{ "|".repeat(this.healthBar.neutral) }}
           </span>
         </span>
-        {{ this.player.health }}/{{ this.player.maxHealth }} ]
+        {{ this.player.health }}/{{ this.player.maxHealth }} &nbsp;]
       </div>
       <div class="status_bar__item">
         <span>HEAT</span>
@@ -276,19 +278,19 @@ export default {
       :level="level"
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
+      :shop-items="shopItems"
       @endTurn="switchTurn()"
       @end-stage="switchStage()"
       @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
-      :shop-items="shopItems"
     ></component>
     <MoveSet
       :moves="this.player.moves"
       :player="player"
       :isPlayerTurn="isPlayerTurn"
-      @selectedMove="(move) => selectMove(move)"
-      @endTurn="switchTurn()"
       :class="[isMobile ? 'rounded_moveset' : '']"
       :isSelecting="this.isSelecting"
+      @selectedMove="(move) => selectMove(move)"
+      @endTurn="switchTurn()"
     ></MoveSet>
     <div id="spacer" v-if="isMobile"></div>
   </main>

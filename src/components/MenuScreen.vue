@@ -11,8 +11,8 @@ export default {
     v-if="gameMode !== 'play' && gameMode !== 'shop'"
   >
     <div class="screen-title" v-if="gameMode === 'main menu'">
-      <h1>TITLE</h1>
-      <h2 @click="this.$emit('start')">Start</h2>
+      <h1>TRIS</h1>
+      <h2 @click="this.$emit('start')">PLAY</h2>
     </div>
     <div class="screen-gameover" v-if="gameMode === 'game over'">
       <h1>GAME OVER</h1>
@@ -22,6 +22,10 @@ export default {
 </template>
 
 <style scoped>
+h1 {
+  font-size: 3rem;
+}
+
 .screen-background {
   color: white;
   background-color: black;
