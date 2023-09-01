@@ -7,8 +7,9 @@ export default {
     level: Object,
     selectedMove: Number,
     isPlayerTurn: Boolean,
+    tutorialTooltip: Number,
   },
-  emits: ["endTurn", "entitiesUpdate", "endStage"],
+  emits: ["endTurn", "entitiesUpdate", "endStage", "button_click"],
   data() {
     return {
       possibleMoves: Array(),
@@ -185,20 +186,30 @@ export default {
         :class="[tile.color]"
         @click="grid_click(tile)"
       >
-        <img
-          v-if="tile.entity.sprite"
-          :src="`/src/assets/entity-${tile.entity.sprite}.svg`"
-          alt="player"
-          class="img-tile"
-        />
-        <div
-          class="game_tile-health_bar"
-          v-if="tile.entity && tile.entity.name !== 'hero'"
+        <Tooltip
+          class="tooltip_wrapper"
+          position="top"
+          :is-visible="tutorialTooltip === 2 && tile.entity.name === 'hero'"
+          @button_click="this.$emit('button_click')"
         >
-          <span class="game_tile-heart" v-if="tile.entity.health">
-            [{{ tile.entity.health }} / {{ tile.entity.maxHealth }}]
-          </span>
-        </div>
+          <template #tooltip>{{ this.$TEXT.tooltip_player }}</template>
+          <template #content>
+            <img
+              v-if="tile.entity.sprite"
+              :src="`/src/assets/entity-${tile.entity.sprite}.svg`"
+              alt="player"
+              class="img-tile"
+            />
+            <div
+              class="game_tile-health_bar"
+              v-if="tile.entity && tile.entity.name !== 'hero'"
+            >
+              <span class="game_tile-heart" v-if="tile.entity.health">
+                [{{ tile.entity.health }} / {{ tile.entity.maxHealth }}]
+              </span>
+            </div>
+          </template>
+        </Tooltip>
       </div>
     </div>
   </div>
@@ -238,6 +249,14 @@ export default {
   bottom: calc(0.2rem - 0.5vh);
   position: absolute;
   font-size: calc(1.2rem + 0.2vw);
+}
+
+.tooltip_wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .blue {

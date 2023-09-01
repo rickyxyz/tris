@@ -24,18 +24,20 @@ export default {
   position: relative;
 }
 .tooltip {
+  font-size: 1.3rem;
+  line-height: 1.5rem;
   position: absolute;
-  text-align: justify;
   z-index: 1;
   background-color: white;
   color: black;
   border: none;
   border-radius: 10px;
   padding: 0.3rem 1rem 0.6rem 1rem;
-  width: 90%;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  width: max-content;
+  max-width: 300px;
 }
 .tooltip-wrapper:hover .tooltip {
   opacity: 1;
@@ -46,6 +48,7 @@ export default {
   aspect-ratio: 1/1;
   min-width: 30px;
   border: none;
+  margin-top: 10px;
   padding-left: 3px;
   padding-top: 4px;
 }

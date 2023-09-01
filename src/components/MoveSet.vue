@@ -4,6 +4,7 @@ export default {
     isSelecting: Boolean,
     player: Object,
     isPlayerTurn: Boolean,
+    stageNumber: Number,
   },
   emits: ["selectedMove", "endTurn"],
   data() {
@@ -36,16 +37,17 @@ export default {
   },
   watch: {
     isPlayerTurn() {
-      if (!this.isPlayerTurn) {
-        this.isActive = -1;
-      }
+      this.isActive = -1;
+    },
+    stageNumber() {
+      this.isActive = -1;
     },
   },
 };
 </script>
 
 <template>
-  <div id="move_set" :class="{ isShopping: isSelecting }">
+  <div class="move_set" :class="{ isShopping: isSelecting }">
     <div class="move_set__header move_set__layout">
       <span>MOVE</span><span>health</span><span>HEAT</span>
     </div>
@@ -79,7 +81,8 @@ export default {
   color: red;
 }
 
-#move_set {
+.move_set {
+  height: 100%;
   display: grid;
   grid-auto-flow: column;
   grid-template-rows: repeat(6, 1fr);

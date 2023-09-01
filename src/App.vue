@@ -169,9 +169,12 @@ export default {
       this.player.heat = 0;
       this.currentStage = Level[this.level.nextLevel];
       this.isPlayerTurn = true;
+      this.isSelecting = false;
       this.level = this.generateStage(this.player, this.currentStage);
+      this.player = this.level.entities.player;
       this.selectMove(-1);
       this.stageNumber++;
+      this.selectedItem = null;
       if (this.stageNumber % 3 === 0) {
         this.mainArea = "shopArea";
         this.gameMode = "shop";
@@ -298,11 +301,14 @@ export default {
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
       :shop-items="shopItems"
+      :tutorialTooltip="tutorialTooltip"
       @endTurn="switchTurn()"
       @end-stage="switchStage()"
       @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
+      @button_click="this.tutorialTooltip += 1"
     ></component>
     <Tooltip
+      id="move_set"
       position="top"
       :is-visible="tutorialTooltip === 1"
       @button_click="this.tutorialTooltip += 1"
@@ -317,6 +323,7 @@ export default {
           :isPlayerTurn="isPlayerTurn"
           :class="[isMobile ? 'rounded_moveset' : '']"
           :isSelecting="this.isSelecting"
+          :stageNumber="this.stageNumber"
           @selectedMove="(move) => selectMove(move)"
           @endTurn="switchTurn()"
         ></MoveSet>
