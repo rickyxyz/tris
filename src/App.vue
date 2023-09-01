@@ -6,6 +6,7 @@ import MenuScreen from "./components/MenuScreen.vue";
 import Attack from "./data/Attack.js";
 import { Level, tileDictionary } from "./data/Level";
 import { coordinateToIndex } from "./utils/Utils";
+import Tooltip from "./components/Tooltip.vue";
 
 export default {
   components: {
@@ -13,9 +14,11 @@ export default {
     MoveSet,
     ShopArea,
     MenuScreen,
+    Tooltip,
   },
   data() {
     return {
+      tutorialTooltip: -1,
       gameMode: "main menu",
       mainArea: "GameArea",
       stageNumber: 2,
@@ -215,6 +218,10 @@ export default {
     generateShopItems() {
       return [Attack.heal, Attack.heatDischarge, Attack.longRush];
     },
+    startGame() {
+      this.tutorialTooltip = 0;
+      this.gameMode = "play";
+    },
   },
   created() {
     window.addEventListener("resize", this.determineDeviceType);
@@ -230,49 +237,61 @@ export default {
   },
 };
 </script>
-
 <template>
   <MenuScreen
+    v-if="gameMode === 'main menu' || gameMode === 'game over'"
     :game-mode="gameMode"
-    @start="this.gameMode = 'play'"
+    @start="startGame"
     @reset="this.resetGame()"
   ></MenuScreen>
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
-    <div id="status_bar">
-      <div class="status_bar__item">
-        <span>HEATLH</span>
-        [
-        <span>
-          <span style="color: var(--tris-green)">
-            {{ "|".repeat(this.healthBar.green) }}
-          </span>
-          <span style="color: gray">
-            {{ "|".repeat(this.healthBar.neutral) }}
-          </span>
-        </span>
-        {{ this.player.health }}/{{ this.player.maxHealth }} &nbsp;]
-      </div>
-      <div class="status_bar__item">
-        <span>HEAT</span>
-        [
-        <span>
-          <span style="color: var(--tris-green)">
-            {{ "|".repeat(this.heatBar.green) }}
-          </span>
-          <span style="color: yellow">
-            {{ "|".repeat(this.heatBar.yellow) }}
-          </span>
-          <span style="color: #ff0000">
-            {{ "|".repeat(this.heatBar.red) }}
-          </span>
-          <span style="color: gray">
-            {{ "|".repeat(this.heatBar.neutral) }}
-          </span>
-        </span>
-        {{ this.player.heat }}/{{ this.player.maxHeat }}&deg;C ]
-      </div>
-    </div>
+    <Tooltip
+      position="bottom"
+      :is-visible="tutorialTooltip === 0"
+      @button_click="this.tutorialTooltip += 1"
+    >
+      <template #tooltip>
+        {{ this.$TEXT.tooltip_statusbar }}
+      </template>
+      <template #content>
+        <div id="status_bar">
+          <div class="status_bar__item">
+            <span>HEATLH</span>
+            [
+            <span>
+              <span style="color: var(--tris-green)">
+                {{ "|".repeat(this.healthBar.green) }}
+              </span>
+              <span style="color: gray">
+                {{ "|".repeat(this.healthBar.neutral) }}
+              </span>
+            </span>
+            {{ this.player.health }}/{{ this.player.maxHealth }} &nbsp;]
+          </div>
+          <div class="status_bar__item">
+            <span>HEAT</span>
+            [
+            <span>
+              <span style="color: var(--tris-green)">
+                {{ "|".repeat(this.heatBar.green) }}
+              </span>
+              <span style="color: yellow">
+                {{ "|".repeat(this.heatBar.yellow) }}
+              </span>
+              <span style="color: #ff0000">
+                {{ "|".repeat(this.heatBar.red) }}
+              </span>
+              <span style="color: gray">
+                {{ "|".repeat(this.heatBar.neutral) }}
+              </span>
+            </span>
+            {{ this.player.heat }}/{{ this.player.maxHeat }}&deg;C ]
+            (-10&deg;C/turn)
+          </div>
+        </div>
+      </template>
+    </Tooltip>
     <component
       :is="mainArea"
       :level="level"
@@ -283,15 +302,27 @@ export default {
       @end-stage="switchStage()"
       @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
     ></component>
-    <MoveSet
-      :moves="this.player.moves"
-      :player="player"
-      :isPlayerTurn="isPlayerTurn"
-      :class="[isMobile ? 'rounded_moveset' : '']"
-      :isSelecting="this.isSelecting"
-      @selectedMove="(move) => selectMove(move)"
-      @endTurn="switchTurn()"
-    ></MoveSet>
+    <Tooltip
+      position="top"
+      :is-visible="tutorialTooltip === 1"
+      @button_click="this.tutorialTooltip += 1"
+    >
+      <template #tooltip>
+        {{ this.$TEXT.tooltip_moveset }}
+      </template>
+      <template #content>
+        <MoveSet
+          :moves="this.player.moves"
+          :player="player"
+          :isPlayerTurn="isPlayerTurn"
+          :class="[isMobile ? 'rounded_moveset' : '']"
+          :isSelecting="this.isSelecting"
+          @selectedMove="(move) => selectMove(move)"
+          @endTurn="switchTurn()"
+        ></MoveSet>
+      </template>
+    </Tooltip>
+
     <div id="spacer" v-if="isMobile"></div>
   </main>
 </template>

@@ -6,10 +6,7 @@ export default {
 </script>
 
 <template>
-  <div
-    class="screen-background"
-    v-if="gameMode !== 'play' && gameMode !== 'shop'"
-  >
+  <div class="screen-background">
     <div class="screen-title" v-if="gameMode === 'main menu'">
       <h1>TRIS</h1>
       <h2 @click="this.$emit('start')">PLAY</h2>
