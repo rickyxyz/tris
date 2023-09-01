@@ -248,7 +248,7 @@ export default {
   max-width: 100%;
   bottom: calc(0.2rem - 0.5vh);
   position: absolute;
-  font-size: calc(1.2rem + 0.2vw);
+  font-size: min(1.5rem, 3.5vw);
 }
 
 .tooltip_wrapper {

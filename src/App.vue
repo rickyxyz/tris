@@ -290,7 +290,6 @@ export default {
               </span>
             </span>
             {{ this.player.heat }}/{{ this.player.maxHeat }}&deg;C ]
-            (-10&deg;C/turn)
           </div>
         </div>
       </template>
