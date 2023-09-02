@@ -8,6 +8,9 @@ const app = createApp(App);
 app.config.errorHandler = (err) => {
   console.log(err);
 };
+app.config.compilerOptions.isCustomElement = (tag) => {
+  return tag.startsWith("ion-");
+};
 app.component("Tooltip", Tooltip);
 app.config.globalProperties.$TEXT = Text;
 app.mount("#app");
