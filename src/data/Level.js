@@ -32,9 +32,15 @@ export const Level = {
     ].flat(),
     spawnPoint: { x: 3, y: 1 },
     entities: [
-      { entity: Enemy.sauropod, spawnPoint: { x: 5, y: 5 } },
+      // { entity: Enemy.sauropod, spawnPoint: { x: 5, y: 5 } },
       { entity: Enemy.t_rex, spawnPoint: { x: 1, y: 1 } },
     ],
-    nextLevel: "level_03",
+    nextLevel: "the_end",
+  },
+  the_end: {
+    stageName: "the end",
+    size: 1,
+    map: [[0]].flat(),
+    spawnPoint: { x: 1, y: 1 },
   },
 };

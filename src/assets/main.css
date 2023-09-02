@@ -3,6 +3,8 @@
 #app {
   font-weight: normal;
   user-select: none;
+  border-left: solid 1px var(--tris-green);
+  border-right: solid 1px var(--tris-green);
 }
 
 a {

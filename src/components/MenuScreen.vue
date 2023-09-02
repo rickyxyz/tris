@@ -1,7 +1,7 @@
 <script lang="ts">
 export default {
   props: { gameMode: String },
-  emits: ["start", "reset"],
+  emits: ["start", "reset", "restart"],
 };
 </script>
 
@@ -14,6 +14,10 @@ export default {
     <div class="screen-gameover" v-if="gameMode === 'game over'">
       <h1>GAME OVER</h1>
       <h2 @click="this.$emit('reset')">RETRY</h2>
+    </div>
+    <div class="screen-endgame" v-if="gameMode === 'the end'">
+      <h2>YOU HAVE REACHED THE END, THANK YOU FOR PLAYING</h2>
+      <h2 @click="this.$emit('restart')">MAIN MENU</h2>
     </div>
   </div>
 </template>
@@ -32,7 +36,7 @@ h1 {
   width: 100%;
   display: flex;
   justify-content: center;
-  padding-top: 30vh;
+  padding: 30vh 2rem 0 2rem;
 }
 
 .screen-background > div {

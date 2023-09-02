@@ -27,7 +27,7 @@ export default {
       isSelecting: false,
       selectedItem: null,
       isMobile: false,
-      currentStage: Level.level_01,
+      currentStage: Level.level_02,
       selectedMoveIndex: -1,
       isPlayerTurn: true,
       level: {},
@@ -168,16 +168,21 @@ export default {
       this.player.health = this.player.maxHealth;
       this.player.heat = 0;
       this.currentStage = Level[this.level.nextLevel];
-      this.isPlayerTurn = true;
-      this.isSelecting = false;
-      this.level = this.generateStage(this.player, this.currentStage);
-      this.player = this.level.entities.player;
-      this.selectMove(-1);
-      this.stageNumber++;
-      this.selectedItem = null;
-      if (this.stageNumber % 3 === 0) {
-        this.mainArea = "shopArea";
-        this.gameMode = "shop";
+      if (this.currentStage.stageName === "the end") {
+        this.gameMode = "the end";
+        console.log(this.gameMode);
+      } else {
+        this.isPlayerTurn = true;
+        this.isSelecting = false;
+        this.level = this.generateStage(this.player, this.currentStage);
+        this.player = this.level.entities.player;
+        this.selectMove(-1);
+        this.stageNumber++;
+        this.selectedItem = null;
+        if (this.stageNumber % 3 === 0) {
+          this.mainArea = "shopArea";
+          this.gameMode = "shop";
+        }
       }
     },
     selectMove(move) {
@@ -225,6 +230,17 @@ export default {
       this.tutorialTooltip = 0;
       this.gameMode = "play";
     },
+    restartGame() {
+      this.player.health = 10;
+      this.currentStage = Level.level_01;
+      this.isSelecting = false;
+      this.selectedMoveIndex = -1;
+      this.level = this.generateStage(this.player, this.currentStage);
+      this.player = this.level.entities.player;
+      this.mainArea = "GameArea";
+      this.gameMode = "main menu";
+      this.isPlayerTurn = true;
+    },
   },
   created() {
     window.addEventListener("resize", this.determineDeviceType);
@@ -242,10 +258,11 @@ export default {
 </script>
 <template>
   <MenuScreen
-    v-if="gameMode === 'main menu' || gameMode === 'game over'"
+    v-if="gameMode !== 'play' && gameMode !== 'shop'"
     :game-mode="gameMode"
     @start="startGame"
     @reset="this.resetGame()"
+    @restart="this.restartGame()"
   ></MenuScreen>
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
