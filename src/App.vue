@@ -27,7 +27,7 @@ export default {
       isSelecting: false,
       selectedItem: null,
       isMobile: false,
-      currentStage: Level.level_02,
+      currentStage: Level.level_01,
       selectedMoveIndex: -1,
       isPlayerTurn: true,
       level: {},
@@ -319,7 +319,7 @@ export default {
       :shop-items="shopItems"
       :tutorialTooltip="tutorialTooltip"
       @endTurn="switchTurn()"
-      @end-stage="switchStage()"
+      @switchStage="switchStage()"
       @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
       @button_click="this.tutorialTooltip += 1"
     ></component>

@@ -3,8 +3,7 @@
 #app {
   font-weight: normal;
   user-select: none;
-  border-left: solid 1px var(--tris-green);
-  border-right: solid 1px var(--tris-green);
+  border: none;
 }
 
 a {
@@ -27,6 +26,8 @@ a {
 
   #app {
     width: 30vw;
+    border-left: solid 1px var(--tris-green);
+    border-right: solid 1px var(--tris-green);
   }
 }
 

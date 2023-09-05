@@ -14,6 +14,8 @@ export default {
     return {
       possibleMoves: Array(),
       isGridHeightBound: true,
+      animationDistanceX: 0,
+      animationDistanceY: 0,
     };
   },
   computed: {
@@ -89,15 +91,36 @@ export default {
         }
       }
     },
-    grid_click(tile) {
+    async grid_click(tile, event) {
       const clickedIndex = coordinateToIndex(tile.coordinate, this.level.size);
+      const playerIndex = coordinateToIndex(
+        this.player.coordinate,
+        this.level.size
+      );
+
+      const dx = this.player.coordinate.x - tile.coordinate.x;
+      const dy = this.player.coordinate.y - tile.coordinate.y;
+
       if (this.possibleMoves.includes(clickedIndex)) {
+        if (
+          tile.entity &&
+          tile.entity.health > this.player.moves[this.selectedMove].damage
+        ) {
+          this.animationDistanceX = `${dx * -100 - Math.sign(dx) * 50}%`;
+          this.animationDistanceY = `${dy * 100 + Math.sign(dy) * 50}%`;
+        } else {
+          this.animationDistanceX = `${dx * -110 - Math.sign(dx) * 120}%`;
+          this.animationDistanceY = `${dy * 105 + Math.sign(dy) * 120}%`;
+        }
+        this.level.tileMap[playerIndex].animation = "animatedMove";
+        await timeout(250);
         move.execute(
           this.level,
           "player",
           this.player.moves[this.selectedMove],
           tile.coordinate
         );
+        this.level.tileMap[playerIndex].animation = "";
         this.clearPossiblemoves();
         this.$emit("endTurn");
       }
@@ -184,7 +207,7 @@ export default {
         :key="idx"
         class="game_tile"
         :class="[tile.color]"
-        @click="grid_click(tile)"
+        @click="grid_click(tile, $event)"
       >
         <Tooltip
           class="tooltip_wrapper"
@@ -198,7 +221,8 @@ export default {
               v-if="tile.entity.sprite"
               :src="`/src/assets/entity-${tile.entity.sprite}.svg`"
               alt="player"
-              class="img-tile"
+              class="img-tile animated"
+              :class="tile.animation"
             />
             <div
               class="game_tile-health_bar"
@@ -216,6 +240,24 @@ export default {
 </template>
 
 <style scoped>
+@keyframes animationMove {
+  from {
+    transform: translate(0, 0);
+    z-index: 1;
+  }
+  to {
+    transform: translate(
+      v-bind(animationDistanceX),
+      v-bind(animationDistanceY)
+    );
+    z-index: 1;
+  }
+}
+
+.animatedMove {
+  animation: 0.3s 1 alternate animationMove;
+}
+
 #game_area {
   display: flex;
   align-items: center;
@@ -280,5 +322,6 @@ export default {
 .grey {
   /* background-color: #565656; */
   background-image: url("../assets/tile-wall.svg");
+  background-size: cover;
 }
 </style>
