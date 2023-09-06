@@ -257,13 +257,15 @@ export default {
 };
 </script>
 <template>
-  <MenuScreen
-    v-if="gameMode !== 'play' && gameMode !== 'shop'"
-    :game-mode="gameMode"
-    @start="startGame"
-    @reset="this.resetGame()"
-    @restart="this.restartGame()"
-  ></MenuScreen>
+  <Transition>
+    <MenuScreen
+      v-if="gameMode !== 'play' && gameMode !== 'shop'"
+      :game-mode="gameMode"
+      @start="startGame"
+      @reset="this.resetGame()"
+      @restart="this.restartGame()"
+    ></MenuScreen>
+  </Transition>
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
     <div id="menu_bar">Menu Bar</div>
     <Tooltip
@@ -326,11 +328,15 @@ export default {
     <Tooltip
       id="move_set"
       position="top"
-      :is-visible="tutorialTooltip === 1"
+      :is-visible="tutorialTooltip === 2 || tutorialTooltip === 3"
       @button_click="this.tutorialTooltip += 1"
     >
       <template #tooltip>
-        {{ this.$TEXT.tooltip_moveset }}
+        {{
+          tutorialTooltip === 2
+            ? this.$TEXT.tooltip_moveset_1
+            : this.$TEXT.tooltip_moveset_2
+        }}
       </template>
       <template #content>
         <MoveSet
@@ -351,6 +357,15 @@ export default {
 </template>
 
 <style scoped>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
 #status_bar {
   display: grid;
   grid-template-rows: repeat(2, 1fr);

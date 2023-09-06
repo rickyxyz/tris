@@ -163,6 +163,9 @@ export default {
         }
         await timeout(400);
 
+        const dx = entity.coordinate.x - nextMove.x;
+        const dy = entity.coordinate.y - nextMove.y;
+
         move.execute(this.level, entity.entityID, entity.moves[0], nextMove);
 
         this.clearPossiblemoves();
@@ -212,7 +215,7 @@ export default {
         <Tooltip
           class="tooltip_wrapper"
           position="top"
-          :is-visible="tutorialTooltip === 2 && tile.entity.name === 'hero'"
+          :is-visible="tutorialTooltip === 1 && tile.entity.name === 'hero'"
           @button_click="this.$emit('button_click')"
         >
           <template #tooltip>{{ this.$TEXT.tooltip_player }}</template>
@@ -255,7 +258,7 @@ export default {
 }
 
 .animatedMove {
-  animation: 0.3s 1 alternate animationMove;
+  animation: 0.3s 1 normal animationMove;
 }
 
 #game_area {
