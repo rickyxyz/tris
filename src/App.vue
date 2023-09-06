@@ -321,7 +321,7 @@ export default {
       :shop-items="shopItems"
       :tutorialTooltip="tutorialTooltip"
       @endTurn="switchTurn()"
-      @switchStage="switchStage()"
+      @endStage="switchStage()"
       @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
       @button_click="this.tutorialTooltip += 1"
     ></component>
