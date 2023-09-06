@@ -56,6 +56,7 @@ export default {
       :key="idx"
       @click="selectMove(idx)"
       class="move_set__layout"
+      :style="{ '--hover-color': move.isUsable ? 'green' : 'red' }"
       :class="
         move.isUsable ? (idx === this.isActive ? 'isActive' : 'green') : 'red'
       "
@@ -100,6 +101,7 @@ export default {
   gap: 1.5rem;
   padding: 0.2rem 0.6rem;
   text-transform: uppercase;
+  border: solid 1px var(--tris-black);
 }
 
 .move_set__layout > span {
@@ -109,10 +111,15 @@ export default {
 .move_set__header {
   background-color: var(--tris-green);
   color: var(--tris-black);
+  border: solid 1px var(--hover-color);
 }
 
 .move_set__item {
   background-color: var(--tris-black);
   color: var(--tris-green);
+}
+
+.move_set__layout:hover {
+  border: solid 1px var(--hover-color);
 }
 </style>
