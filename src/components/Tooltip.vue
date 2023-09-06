@@ -38,6 +38,7 @@ export default {
   align-items: flex-end;
   width: max-content;
   max-width: 300px;
+  gap: 0.5rem;
 }
 .tooltip-wrapper:hover .tooltip {
   opacity: 1;
@@ -48,9 +49,13 @@ export default {
   aspect-ratio: 1/1;
   min-width: 30px;
   border: none;
-  margin-top: 10px;
-  padding-left: 3px;
-  padding-top: 4px;
+  color: var(--tris-black);
+  background-color: rgb(208, 208, 208);
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 2px;
 }
 .bottom {
   top: 100%;

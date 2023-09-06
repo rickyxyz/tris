@@ -12,6 +12,7 @@ export default {
   emits: ["endTurn", "entitiesUpdate", "endStage", "button_click"],
   data() {
     return {
+      isInTransition: false,
       possibleMoves: Array(),
       isGridHeightBound: true,
       animationDistanceX: 0,
@@ -171,7 +172,12 @@ export default {
         this.clearPossiblemoves();
         await timeout(100);
       }
-      endStage ? this.$emit("endStage") : this.$emit("endTurn");
+      await timeout(200);
+      if (endStage) {
+        this.isInTransition = true;
+      } else {
+        this.$emit("endTurn");
+      }
     },
   },
   watch: {
@@ -201,6 +207,22 @@ export default {
 
 <template>
   <div id="game_area" ref="gameArea">
+    <Transition>
+      <div class="stage_transition" v-if="isInTransition">
+        <p>Stage Clear</p>
+        <button
+          class="stage_transition__button"
+          @click="
+            () => {
+              this.isInTransition = false;
+              this.$emit('endStage');
+            }
+          "
+        >
+          next stage
+        </button>
+      </div>
+    </Transition>
     <div
       id="game_grid"
       :style="[this.isGridHeightBound ? { height: '100%' } : { width: '100%' }]"
@@ -243,6 +265,38 @@ export default {
 </template>
 
 <style scoped>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
+.stage_transition {
+  text-transform: uppercase;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  border: solid 1px var(--tris-green);
+  background-color: var(--tris-black);
+  font-size: 2rem;
+}
+
+.stage_transition__button {
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  padding: 5px 10px;
+}
+
 @keyframes animationMove {
   from {
     transform: translate(0, 0);
@@ -262,6 +316,7 @@ export default {
 }
 
 #game_area {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
