@@ -18,6 +18,7 @@ export const Level = {
     ].flat(),
     spawnPoint: { x: 2, y: 2 },
     entities: [{ entity: Enemy.t_rex, spawnPoint: { x: 2, y: 3 } }],
+    nextIsShop: true,
     nextLevel: "level_02",
   },
   level_02: {
@@ -32,7 +33,7 @@ export const Level = {
     ].flat(),
     spawnPoint: { x: 3, y: 1 },
     entities: [
-      // { entity: Enemy.sauropod, spawnPoint: { x: 5, y: 5 } },
+      { entity: Enemy.sauropod, spawnPoint: { x: 5, y: 5 } },
       { entity: Enemy.t_rex, spawnPoint: { x: 1, y: 1 } },
     ],
     nextLevel: "the_end",

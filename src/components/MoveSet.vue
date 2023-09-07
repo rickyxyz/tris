@@ -4,7 +4,6 @@ export default {
     isSelecting: Boolean,
     player: Object,
     isPlayerTurn: Boolean,
-    stageNumber: Number,
   },
   emits: ["selectedMove", "endTurn"],
   data() {
@@ -37,9 +36,6 @@ export default {
   },
   watch: {
     isPlayerTurn() {
-      this.isActive = -1;
-    },
-    stageNumber() {
       this.isActive = -1;
     },
   },

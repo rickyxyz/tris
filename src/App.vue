@@ -19,10 +19,8 @@ export default {
   data() {
     return {
       tutorialTooltip: -1,
-      gameMode: "play",
+      menuMode: "main menu",
       mainArea: "GameArea",
-      stageNumber: 2,
-      shopLeft: 1,
       shopItems: [],
       isSelecting: false,
       selectedItem: null,
@@ -84,7 +82,7 @@ export default {
       this.level = this.generateStage(this.player, this.currentStage);
       this.player = this.level.entities.player;
       this.mainArea = "GameArea";
-      this.gameMode = "play";
+      this.menuMode = "";
       this.isPlayerTurn = true;
     },
     determineDeviceType() {
@@ -103,7 +101,7 @@ export default {
     },
     switchTurn() {
       if (this.player.health <= 0) {
-        this.gameMode = "game over";
+        this.menuMode = "game over";
         this.isPlayerTurn = true;
         return;
       }
@@ -162,6 +160,7 @@ export default {
         name: level.stageName,
         size: level.size,
         nextLevel: level.nextLevel,
+        nextIsShop: level.nextIsShop,
       };
     },
     switchStage() {
@@ -169,20 +168,18 @@ export default {
       this.player.heat = 0;
       this.currentStage = Level[this.level.nextLevel];
       if (this.currentStage.stageName === "the end") {
-        this.gameMode = "the end";
-        console.log(this.gameMode);
+        this.menuMode = "the end";
+        console.log(this.menuMode);
       } else {
+        if (this.level.nextIsShop) {
+          this.mainArea = "shopArea";
+        }
         this.isPlayerTurn = true;
         this.isSelecting = false;
         this.level = this.generateStage(this.player, this.currentStage);
         this.player = this.level.entities.player;
         this.selectMove(-1);
-        this.stageNumber++;
         this.selectedItem = null;
-        if (this.stageNumber % 3 === 0) {
-          this.mainArea = "shopArea";
-          this.gameMode = "shop";
-        }
       }
     },
     selectMove(move) {
@@ -191,10 +188,7 @@ export default {
         this.shopItems[this.selectedItem] = {};
         this.selectedItem = null;
         this.isSelecting = false;
-        this.shopLeft--;
-        if (this.shopLeft < 1) {
-          this.exitShop();
-        }
+        this.exitShop();
       } else {
         if (move === this.selectedMoveIndex) {
           move = -1;
@@ -207,8 +201,6 @@ export default {
       this.selectedItem = null;
       this.shopItems = [];
       this.mainArea = "gameArea";
-      this.gameMode = "play";
-      this.shopLeft = 3;
     },
     selectShopItem(shopItem) {
       this.isSelecting = false;
@@ -228,7 +220,7 @@ export default {
     },
     startGame() {
       this.tutorialTooltip = 0;
-      this.gameMode = "play";
+      this.menuMode = "";
     },
     restartGame() {
       this.player.health = 10;
@@ -238,7 +230,7 @@ export default {
       this.level = this.generateStage(this.player, this.currentStage);
       this.player = this.level.entities.player;
       this.mainArea = "GameArea";
-      this.gameMode = "main menu";
+      this.menuMode = "main menu";
       this.isPlayerTurn = true;
     },
   },
@@ -259,8 +251,8 @@ export default {
 <template>
   <Transition>
     <MenuScreen
-      v-if="gameMode !== 'play' && gameMode !== 'shop'"
-      :game-mode="gameMode"
+      v-if="menuMode"
+      :menu-mode="menuMode"
       @start="startGame"
       @reset="this.resetGame()"
       @restart="this.restartGame()"
@@ -345,7 +337,6 @@ export default {
           :isPlayerTurn="isPlayerTurn"
           :class="[isMobile ? 'rounded_moveset' : '']"
           :isSelecting="this.isSelecting"
-          :stageNumber="this.stageNumber"
           @selectedMove="(move) => selectMove(move)"
           @endTurn="switchTurn()"
         ></MoveSet>
