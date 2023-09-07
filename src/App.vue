@@ -20,7 +20,7 @@ export default {
     return {
       tutorialTooltip: -1,
       gameMode: "main menu",
-      mainArea: "GameArea",
+      mainArea: "ShopArea",
       stageNumber: 2,
       shopLeft: 1,
       shopItems: [],

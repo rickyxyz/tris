@@ -69,6 +69,15 @@ export default {
 </template>
 
 <style scoped>
+@keyframes blinking {
+  from {
+    border: solid 1px var(--tris-green);
+  }
+  to {
+    border: solid 1px var(--tris-black);
+  }
+}
+
 .isActive {
   background-color: var(--tris-green);
   color: var(--tris-black);
@@ -91,7 +100,7 @@ export default {
 }
 
 .isShopping {
-  outline: solid 1px var(--tris-green);
+  animation: blinking 1s ease-out 0.5s infinite alternate none;
 }
 
 .move_set__layout {

@@ -19,7 +19,10 @@ export default {
   <div id="game_area">
     <div
       class="shop_item"
-      :class="idx == selectedItem ? 'isActive' : ''"
+      :class="[
+        idx == selectedItem ? 'isActive' : '',
+        selectedItem < 0 ? 'shop_item-hover' : '',
+      ]"
       v-for="(shopItem, idx) in this.shopItems"
       :key="idx"
       @click="this.selectItem(idx)"
@@ -51,9 +54,16 @@ export default {
   overflow: hidden;
 }
 
-.isActive {
+.isActive,
+.shop_item__exit:hover,
+.shop_item-hover:hover {
   background-color: var(--tris-green);
   color: var(--tris-black);
+}
+
+.isActive .shop_item__header,
+.shop_item-hover:hover .shop_item__header {
+  border-bottom: 1px solid var(--tris-black);
 }
 
 .shop_item {
