@@ -74,17 +74,6 @@ export default {
     },
   },
   methods: {
-    resetGame() {
-      this.player.health = 10;
-      this.currentStage = Level.level_01;
-      this.isSelecting = false;
-      this.selectedMoveIndex = -1;
-      this.level = this.generateStage(this.player, this.currentStage);
-      this.player = this.level.entities.player;
-      this.mainArea = "GameArea";
-      this.menuMode = "";
-      this.isPlayerTurn = true;
-    },
     determineDeviceType() {
       let value = "100vh";
       if (window.innerWidth && window.innerWidth <= 1100) {
@@ -99,17 +88,20 @@ export default {
         (window.innerHeight > window.innerWidth &&
           Math.abs(window.innerHeight - window.innerWidth) > 300);
     },
-    switchTurn() {
-      if (this.player.health <= 0) {
-        this.menuMode = "game over";
-        this.isPlayerTurn = true;
-        return;
-      }
-      this.isPlayerTurn = !this.isPlayerTurn;
-      this.selectMove(-1);
-      if (this.isPlayerTurn) {
-        this.player.heat = Math.max(0, this.player.heat - 5);
-      }
+    startGame() {
+      this.tutorialTooltip = 0;
+      this.menuMode = "";
+    },
+    resetGame() {
+      this.player.health = 10;
+      this.currentStage = Level.level_01;
+      this.isSelecting = false;
+      this.selectedMoveIndex = -1;
+      this.level = this.generateStage(this.player, this.currentStage);
+      this.player = this.level.entities.player;
+      this.mainArea = "GameArea";
+      this.menuMode = "";
+      this.isPlayerTurn = true;
     },
     generateStage(player, level) {
       let entityCounter = 0;
@@ -163,6 +155,32 @@ export default {
         nextIsShop: level.nextIsShop,
       };
     },
+    selectMove(move) {
+      if (this.isSelecting) {
+        this.player.moves[move] = this.shopItems[this.selectedItem];
+        this.shopItems[this.selectedItem] = {};
+        this.selectedItem = null;
+        this.isSelecting = false;
+        this.exitShop();
+      } else {
+        if (move === this.selectedMoveIndex) {
+          move = -1;
+        }
+        this.selectedMoveIndex = move;
+      }
+    },
+    switchTurn() {
+      if (this.player.health <= 0) {
+        this.menuMode = "game over";
+        this.isPlayerTurn = true;
+        return;
+      }
+      this.isPlayerTurn = !this.isPlayerTurn;
+      this.selectMove(-1);
+      if (this.isPlayerTurn) {
+        this.player.heat = Math.max(0, this.player.heat - 5);
+      }
+    },
     switchStage() {
       this.player.health = this.player.maxHealth;
       this.player.heat = 0;
@@ -182,25 +200,8 @@ export default {
         this.selectedItem = null;
       }
     },
-    selectMove(move) {
-      if (this.isSelecting) {
-        this.player.moves[move] = this.shopItems[this.selectedItem];
-        this.shopItems[this.selectedItem] = {};
-        this.selectedItem = null;
-        this.isSelecting = false;
-        this.exitShop();
-      } else {
-        if (move === this.selectedMoveIndex) {
-          move = -1;
-        }
-        this.selectedMoveIndex = move;
-      }
-    },
-    exitShop() {
-      this.isSelecting = false;
-      this.selectedItem = null;
-      this.shopItems = [];
-      this.mainArea = "gameArea";
+    generateShopItems() {
+      return [Attack.heal, Attack.heatDischarge, Attack.longRush];
     },
     selectShopItem(shopItem) {
       this.isSelecting = false;
@@ -215,23 +216,11 @@ export default {
         this.selectedItem = shopItem;
       }
     },
-    generateShopItems() {
-      return [Attack.heal, Attack.heatDischarge, Attack.longRush];
-    },
-    startGame() {
-      this.tutorialTooltip = 0;
-      this.menuMode = "";
-    },
-    restartGame() {
-      this.player.health = 10;
-      this.currentStage = Level.level_01;
+    exitShop() {
       this.isSelecting = false;
-      this.selectedMoveIndex = -1;
-      this.level = this.generateStage(this.player, this.currentStage);
-      this.player = this.level.entities.player;
-      this.mainArea = "GameArea";
-      this.menuMode = "main menu";
-      this.isPlayerTurn = true;
+      this.selectedItem = null;
+      this.shopItems = [];
+      this.mainArea = "gameArea";
     },
   },
   created() {
@@ -255,7 +244,7 @@ export default {
       :menu-mode="menuMode"
       @start="startGame"
       @reset="this.resetGame()"
-      @restart="this.restartGame()"
+      @restart="this.resetGame()"
     ></MenuScreen>
   </Transition>
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
