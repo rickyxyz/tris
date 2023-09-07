@@ -19,8 +19,8 @@ export default {
   data() {
     return {
       tutorialTooltip: -1,
-      gameMode: "main menu",
-      mainArea: "ShopArea",
+      gameMode: "play",
+      mainArea: "GameArea",
       stageNumber: 2,
       shopLeft: 1,
       shopItems: [],

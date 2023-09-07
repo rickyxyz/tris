@@ -363,6 +363,15 @@ export default {
   background-color: #28e47388;
 }
 
+.blue:hover {
+  background-color: #28e473d4;
+}
+
+.red:hover {
+  color: #ff0000;
+  background-color: #ff0000aa;
+}
+
 .red {
   color: #ff0000;
   background-color: #ff000034;
