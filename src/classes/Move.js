@@ -244,6 +244,10 @@ export function execute(level, entityID, move, targetCoordinate) {
         }
       }
       break;
+    case "self":
+      user.health = Math.min(user.maxHealth, user.health - move.damage);
+      user.heat = Math.max(0, user.heat + move.heat);
+      break;
     case "collateral":
       const area = possibleMovesCache;
       for (let tile of area) {
