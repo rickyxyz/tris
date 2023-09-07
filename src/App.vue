@@ -91,6 +91,8 @@ export default {
     startGame() {
       this.tutorialTooltip = 0;
       this.menuMode = "";
+      this.level = this.generateStage(this.player, this.currentStage);
+      this.player = this.level.entities.player;
     },
     resetGame() {
       this.player.health = 10;
@@ -190,6 +192,7 @@ export default {
         console.log(this.menuMode);
       } else {
         if (this.level.nextIsShop) {
+          this.shopItems = this.generateShopItems();
           this.mainArea = "shopArea";
         }
         this.isPlayerTurn = true;
@@ -225,12 +228,9 @@ export default {
   },
   created() {
     window.addEventListener("resize", this.determineDeviceType);
-    this.level = this.generateStage(this.player, this.currentStage);
-    this.player = this.level.entities.player;
   },
   mounted() {
     this.determineDeviceType();
-    this.shopItems = this.generateShopItems();
   },
   destroyed() {
     window.removeEventListener("resize", this.determineDeviceType);
