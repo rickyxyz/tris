@@ -244,7 +244,7 @@ export default {
           <template #content>
             <img
               v-if="tile.entity.sprite"
-              :src="`/src/assets/entity-${tile.entity.sprite}.svg`"
+              :src="`/entity-${tile.entity.sprite}.svg`"
               alt="player"
               class="img-tile animated"
               :class="tile.animation"
