@@ -1,15 +1,19 @@
 <script lang="ts">
+import Action from "../data/Action";
+
 export default {
-  props: ["shopItems"],
   emits: ["selectedShopItem"],
   data() {
-    return { selectedItem: -1 };
+    return {
+      shopItems: [Action.heal, Action.heatDischarge, Action.longRush],
+      selectedItem: -1,
+    };
   },
   methods: {
-    selectItem(idx) {
+    selectItem(shopItem, idx) {
       const newItemIndex = this.selectedItem === idx ? -1 : idx;
       this.selectedItem = newItemIndex;
-      this.$emit("selectedShopItem", newItemIndex);
+      this.$emit("selectedShopItem", this.selectedItem >= 0 ? shopItem : {});
     },
   },
 };
@@ -25,7 +29,7 @@ export default {
       ]"
       v-for="(shopItem, idx) in this.shopItems"
       :key="idx"
-      @click="this.selectItem(idx)"
+      @click="this.selectItem(shopItem, idx)"
     >
       <div class="shop_item__header">
         <span>{{ shopItem.name ?? idx }}</span>

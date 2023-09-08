@@ -1,4 +1,4 @@
-import Attack from "./Attack.js";
+import Action from "./Action.js";
 
 export default {
   player: {
@@ -10,11 +10,11 @@ export default {
     heat: 0,
     maxHeat: 20,
     moves: [
-      Attack.rush,
-      Attack.slice,
-      Attack.explode,
-      Attack.locked,
-      Attack.locked,
+      Action.rush,
+      Action.slice,
+      Action.explode,
+      Action.locked,
+      Action.locked,
     ],
   },
   sauropod: {
@@ -24,7 +24,7 @@ export default {
     health: 2,
     maxHealth: 2,
     heat: 0,
-    moves: [Attack.slice],
+    moves: [Action.slice],
   },
   t_rex: {
     name: "T-rex",
@@ -33,6 +33,6 @@ export default {
     health: 1,
     maxHealth: 1,
     heat: 0,
-    moves: [Attack.rush],
+    moves: [Action.rush],
   },
 };

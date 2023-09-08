@@ -2,7 +2,6 @@
 import GameArea from "./components/GameArea.vue";
 import ShopArea from "./components/ShopArea.vue";
 import MoveSet from "./components/MoveSet.vue";
-import Attack from "./data/Attack.js";
 import Entity from "./data/Entity";
 import { Level, tileDictionary } from "./data/Level";
 import { coordinateToIndex } from "./utils/Utils";
@@ -19,9 +18,8 @@ export default {
     return {
       tutorialTooltip: 0,
       mainArea: "GameArea",
-      shopItems: [],
-      isSelecting: false,
-      selectedItem: null,
+      isShopping: false,
+      selectedShopItem: null,
       isMobile: false,
       currentStage: Level.level_01,
       selectedMoveIndex: -1,
@@ -73,7 +71,7 @@ export default {
     },
     resetGame() {
       this.currentStage = Level.level_01;
-      this.isSelecting = false;
+      this.isShopping = false;
       this.selectedMoveIndex = -1;
       this.level = this.generateStage(Entity.player, this.currentStage);
       this.player = this.level.entities.player;
@@ -133,11 +131,9 @@ export default {
       };
     },
     selectMove(move) {
-      if (this.isSelecting) {
-        this.player.moves[move] = this.shopItems[this.selectedItem];
-        this.shopItems[this.selectedItem] = {};
-        this.selectedItem = null;
-        this.isSelecting = false;
+      if (this.isShopping) {
+        this.player.moves[move] = this.selectedShopItem;
+        this.isShopping = false;
         this.exitShop();
       } else {
         if (move === this.selectedMoveIndex) {
@@ -158,46 +154,38 @@ export default {
       this.player.heat = 0;
       this.currentStage = Level[this.level.nextLevel];
       if (this.level.nextIsShop) {
-        this.shopItems = this.generateShopItems();
         this.mainArea = "shopArea";
       }
       this.isPlayerTurn = true;
-      this.isSelecting = false;
+      this.isShopping = false;
       this.level = this.generateStage(this.player, this.currentStage);
       this.player = this.level.entities.player;
       this.selectMove(-1);
-      this.selectedItem = null;
-    },
-    generateShopItems() {
-      return [Attack.heal, Attack.heatDischarge, Attack.longRush];
+      this.selectedShopItem = null;
     },
     selectShopItem(shopItem) {
-      this.isSelecting = false;
-      this.selectedItem = -1;
+      this.isShopping = false;
+      this.selectedShopItem = {};
 
-      if (shopItem === "exit") {
-        this.exitShop();
-        return;
-      }
-      if (shopItem >= 0) {
-        this.isSelecting = true;
-        this.selectedItem = shopItem;
+      if (shopItem.name) {
+        this.isShopping = true;
+        this.selectedShopItem = shopItem;
       }
     },
     exitShop() {
-      this.isSelecting = false;
-      this.selectedItem = null;
+      this.isShopping = false;
+      this.selectedShopItem = null;
       this.shopItems = [];
       this.mainArea = "gameArea";
     },
   },
   created() {
     window.addEventListener("resize", this.determineDeviceType);
+    this.level = this.generateStage(Entity.player, this.currentStage);
+    this.player = this.level.entities.player;
   },
   mounted() {
     this.determineDeviceType();
-    this.level = this.generateStage(Entity.player, this.currentStage);
-    this.player = this.level.entities.player;
   },
   destroyed() {
     window.removeEventListener("resize", this.determineDeviceType);
@@ -258,7 +246,6 @@ export default {
       :level="level"
       :selectedMove="selectedMoveIndex"
       :isPlayerTurn="isPlayerTurn"
-      :shop-items="shopItems"
       :tutorialTooltip="tutorialTooltip"
       @endTurn="switchTurn()"
       @endStage="switchStage()"
@@ -285,13 +272,12 @@ export default {
           :player="player"
           :isPlayerTurn="isPlayerTurn"
           :class="[isMobile ? 'rounded_moveset' : '']"
-          :isSelecting="this.isSelecting"
+          :isShopping="this.isShopping"
           @selectedMove="(move) => selectMove(move)"
           @endTurn="switchTurn()"
         ></MoveSet>
       </template>
     </Tooltip>
-
     <div id="spacer" v-if="isMobile"></div>
   </main>
 </template>
