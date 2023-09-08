@@ -8,6 +8,7 @@ export default {
   emits: ["button_click"],
 };
 </script>
+
 <template>
   <div class="tooltip-wrapper">
     <slot name="content"> </slot>
@@ -19,6 +20,7 @@ export default {
     </span>
   </div>
 </template>
+
 <style scoped>
 .tooltip-wrapper {
   position: relative;
@@ -48,14 +50,18 @@ export default {
   border-radius: 100%;
   aspect-ratio: 1/1;
   min-width: 30px;
-  border: none;
+  border: solid 1px var(--tris-black);
   color: var(--tris-black);
-  background-color: rgb(208, 208, 208);
+  background-color: white;
   font-size: 1.2rem;
   display: flex;
   justify-content: center;
   align-items: center;
   padding-left: 2px;
+}
+.tooltip_button:hover {
+  color: var(--tris-green);
+  border: solid 1px var(--tris-green);
 }
 .bottom {
   top: 100%;
