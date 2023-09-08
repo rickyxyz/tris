@@ -190,9 +190,6 @@ export default {
   mounted() {
     this.determineDeviceType();
   },
-  destroyed() {
-    window.removeEventListener("resize", this.determineDeviceType);
-  },
 };
 </script>
 <template>
