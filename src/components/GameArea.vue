@@ -326,6 +326,11 @@ export default {
   padding: 5px 10px;
 }
 
+.stage_transition__button:hover {
+  color: var(--tris-black);
+  background-color: var(--tris-green);
+}
+
 @keyframes animationMove {
   from {
     transform: translate(0, 0);
