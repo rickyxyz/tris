@@ -181,6 +181,9 @@ export default {
   },
   created() {
     window.addEventListener("resize", this.determineDeviceType);
+    window.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") this.tutorialTooltip += 1;
+    });
     this.level = this.generateStage(Entity.player, this.currentStage);
     this.player = this.level.entities.player;
   },
