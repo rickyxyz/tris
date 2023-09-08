@@ -1,6 +1,16 @@
-# tris
+# Tris
 
-This template should help get you started developing with Vue 3 in Vite.
+This project is a sample game project I used to learn VueJS3.
+
+![Tris Screenshot](tris-screenshot.png)
+
+In this game your objective to clear all enemies on the stage by using the available moves on the bottom.
+
+## Guide
+
+- If your health reaches zero, the game restarts
+- Every move consume your health and increase your heat
+- Every turn your heat decreases
 
 ## Recommended IDE Setup
 
