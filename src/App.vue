@@ -72,7 +72,6 @@ export default {
           Math.abs(window.innerHeight - window.innerWidth) > 300);
     },
     resetGame() {
-      this.player.health = 10;
       this.currentStage = Level.level_01;
       this.isSelecting = false;
       this.selectedMoveIndex = -1;
@@ -151,7 +150,7 @@ export default {
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
       if (this.isPlayerTurn) {
-        this.player.heat = Math.max(0, this.player.heat - 5);
+        this.player.heat = Math.max(0, this.player.heat - 2);
       }
     },
     switchStage() {

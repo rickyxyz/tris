@@ -116,7 +116,7 @@ export default {
         }
       }
     },
-    async grid_click(tile, event) {
+    async grid_click(tile) {
       const clickedIndex = coordinateToIndex(tile.coordinate, this.level.size);
       const playerIndex = coordinateToIndex(
         this.player.coordinate,
@@ -261,7 +261,7 @@ export default {
         :key="idx"
         class="game_tile"
         :class="[tile.color]"
-        @click="grid_click(tile, $event)"
+        @click="grid_click(tile)"
       >
         <Tooltip
           class="tooltip_wrapper"
