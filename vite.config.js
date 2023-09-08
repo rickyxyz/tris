@@ -1,4 +1,3 @@
-import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
@@ -17,11 +16,5 @@ export default defineConfig({
   server: {
     host: true,
     port: 6969,
-  },
-  test: {
-    globals: true,
-    coverage: {
-      provider: "v8",
-    },
   },
 });
