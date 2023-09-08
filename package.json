@@ -10,7 +10,6 @@
     "coverage": "vitest --coverage"
   },
   "dependencies": {
-    "serve": "^14.2.1",
     "vue": "^3.2.47"
   },
   "devDependencies": {
