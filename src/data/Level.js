@@ -1,4 +1,4 @@
-import Enemy from "./Enemy";
+import Entity from "./Entity";
 
 export const tileDictionary = {
   0: { name: "empty", isOccupiable: true, color: "white" },
@@ -7,7 +7,7 @@ export const tileDictionary = {
 
 export const Level = {
   level_01: {
-    stageName: "development_01",
+    stageName: "stage 1",
     size: 5,
     map: [
       [0, 0, 0, 0, 0],
@@ -17,12 +17,12 @@ export const Level = {
       [0, 0, 0, 0, 0],
     ].flat(),
     spawnPoint: { x: 2, y: 2 },
-    entities: [{ entity: Enemy.t_rex, spawnPoint: { x: 2, y: 3 } }],
+    entities: [{ entity: Entity.t_rex, spawnPoint: { x: 2, y: 3 } }],
     nextIsShop: true,
     nextLevel: "level_02",
   },
   level_02: {
-    stageName: "development_02",
+    stageName: "stage 2",
     size: 5,
     map: [
       [0, 0, 0, 0, 0],
@@ -33,8 +33,8 @@ export const Level = {
     ].flat(),
     spawnPoint: { x: 3, y: 1 },
     entities: [
-      { entity: Enemy.sauropod, spawnPoint: { x: 5, y: 5 } },
-      { entity: Enemy.t_rex, spawnPoint: { x: 1, y: 1 } },
+      { entity: Entity.sauropod, spawnPoint: { x: 5, y: 5 } },
+      { entity: Entity.t_rex, spawnPoint: { x: 1, y: 1 } },
     ],
     nextLevel: "the_end",
   },

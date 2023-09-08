@@ -2,8 +2,8 @@
 import GameArea from "./components/GameArea.vue";
 import ShopArea from "./components/ShopArea.vue";
 import MoveSet from "./components/MoveSet.vue";
-import MenuScreen from "./components/MenuScreen.vue";
 import Attack from "./data/Attack.js";
+import Entity from "./data/Entity";
 import { Level, tileDictionary } from "./data/Level";
 import { coordinateToIndex } from "./utils/Utils";
 import Tooltip from "./components/Tooltip.vue";
@@ -13,13 +13,11 @@ export default {
     GameArea,
     MoveSet,
     ShopArea,
-    MenuScreen,
     Tooltip,
   },
   data() {
     return {
-      tutorialTooltip: -1,
-      menuMode: "main menu",
+      tutorialTooltip: 0,
       mainArea: "GameArea",
       shopItems: [],
       isSelecting: false,
@@ -29,22 +27,7 @@ export default {
       selectedMoveIndex: -1,
       isPlayerTurn: true,
       level: {},
-      player: {
-        name: "hero",
-        type: "player",
-        sprite: "player",
-        health: 10,
-        maxHealth: 10,
-        heat: 0,
-        maxHeat: 20,
-        moves: [
-          Attack.rush,
-          Attack.slice,
-          Attack.explode,
-          Attack.locked,
-          Attack.locked,
-        ],
-      },
+      player: {},
     };
   },
   computed: {
@@ -88,21 +71,14 @@ export default {
         (window.innerHeight > window.innerWidth &&
           Math.abs(window.innerHeight - window.innerWidth) > 300);
     },
-    startGame() {
-      this.tutorialTooltip = 0;
-      this.menuMode = "";
-      this.level = this.generateStage(this.player, this.currentStage);
-      this.player = this.level.entities.player;
-    },
     resetGame() {
       this.player.health = 10;
       this.currentStage = Level.level_01;
       this.isSelecting = false;
       this.selectedMoveIndex = -1;
-      this.level = this.generateStage(this.player, this.currentStage);
+      this.level = this.generateStage(Entity.player, this.currentStage);
       this.player = this.level.entities.player;
       this.mainArea = "GameArea";
-      this.menuMode = "";
       this.isPlayerTurn = true;
     },
     generateStage(player, level) {
@@ -172,11 +148,6 @@ export default {
       }
     },
     switchTurn() {
-      if (this.player.health <= 0) {
-        this.menuMode = "game over";
-        this.isPlayerTurn = true;
-        return;
-      }
       this.isPlayerTurn = !this.isPlayerTurn;
       this.selectMove(-1);
       if (this.isPlayerTurn) {
@@ -187,21 +158,16 @@ export default {
       this.player.health = this.player.maxHealth;
       this.player.heat = 0;
       this.currentStage = Level[this.level.nextLevel];
-      if (this.currentStage.stageName === "the end") {
-        this.menuMode = "the end";
-        console.log(this.menuMode);
-      } else {
-        if (this.level.nextIsShop) {
-          this.shopItems = this.generateShopItems();
-          this.mainArea = "shopArea";
-        }
-        this.isPlayerTurn = true;
-        this.isSelecting = false;
-        this.level = this.generateStage(this.player, this.currentStage);
-        this.player = this.level.entities.player;
-        this.selectMove(-1);
-        this.selectedItem = null;
+      if (this.level.nextIsShop) {
+        this.shopItems = this.generateShopItems();
+        this.mainArea = "shopArea";
       }
+      this.isPlayerTurn = true;
+      this.isSelecting = false;
+      this.level = this.generateStage(this.player, this.currentStage);
+      this.player = this.level.entities.player;
+      this.selectMove(-1);
+      this.selectedItem = null;
     },
     generateShopItems() {
       return [Attack.heal, Attack.heatDischarge, Attack.longRush];
@@ -231,6 +197,8 @@ export default {
   },
   mounted() {
     this.determineDeviceType();
+    this.level = this.generateStage(Entity.player, this.currentStage);
+    this.player = this.level.entities.player;
   },
   destroyed() {
     window.removeEventListener("resize", this.determineDeviceType);
@@ -238,17 +206,9 @@ export default {
 };
 </script>
 <template>
-  <Transition>
-    <MenuScreen
-      v-if="menuMode"
-      :menu-mode="menuMode"
-      @start="startGame"
-      @reset="this.resetGame()"
-      @restart="this.resetGame()"
-    ></MenuScreen>
-  </Transition>
+  <Transition> </Transition>
   <main :class="[isMobile ? 'mobile_layout' : 'desktop_layout']">
-    <div id="menu_bar">Menu Bar</div>
+    <div id="menu_bar">{{ this.level.name }}</div>
     <Tooltip
       position="bottom"
       :is-visible="tutorialTooltip === 0"
@@ -303,6 +263,7 @@ export default {
       :tutorialTooltip="tutorialTooltip"
       @endTurn="switchTurn()"
       @endStage="switchStage()"
+      @resetStage="resetGame()"
       @selectedShopItem="(shopItem) => selectShopItem(shopItem)"
       @button_click="this.tutorialTooltip += 1"
     ></component>

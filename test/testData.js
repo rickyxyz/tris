@@ -1,5 +1,5 @@
 import Attack from "../src/data/Attack";
-import Enemy from "../src/data/Enemy";
+import Entity from "../src/data/Entity";
 
 export const testPlayer = {
   name: "hero",
@@ -33,6 +33,6 @@ export const testLevel2 = {
     [0, 0],
   ].flat(),
   spawnPoint: { x: 1, y: 1 },
-  entities: [{ entity: Enemy.sauropod, spawnPoint: { x: 2, y: 2 } }],
+  entities: [{ entity: Entity.sauropod, spawnPoint: { x: 2, y: 2 } }],
   nextLevel: null,
 };

@@ -1,6 +1,22 @@
 import Attack from "./Attack.js";
 
 export default {
+  player: {
+    name: "hero",
+    type: "player",
+    sprite: "player",
+    health: 10,
+    maxHealth: 10,
+    heat: 0,
+    maxHeat: 20,
+    moves: [
+      Attack.rush,
+      Attack.slice,
+      Attack.explode,
+      Attack.locked,
+      Attack.locked,
+    ],
+  },
   sauropod: {
     name: "Sauropod",
     type: "enemy",

@@ -9,14 +9,38 @@ export default {
     isPlayerTurn: Boolean,
     tutorialTooltip: Number,
   },
-  emits: ["endTurn", "entitiesUpdate", "endStage", "button_click"],
+  emits: [
+    "endTurn",
+    "entitiesUpdate",
+    "endStage",
+    "resetStage",
+    "button_click",
+  ],
   data() {
     return {
       isInTransition: false,
+      transitionType: "",
       possibleMoves: Array(),
       isGridHeightBound: true,
       animationDistanceX: 0,
       animationDistanceY: 0,
+      transition: {
+        stageClear: {
+          header: "Stage Clear",
+          button: "Next Stage",
+          emit: "endStage",
+        },
+        stageFail: {
+          header: "Stage Failed",
+          button: "Restart",
+          emit: "resetStage",
+        },
+        gameClear: {
+          header: "You cleared the game",
+          button: "Restart",
+          emit: "resetStage",
+        },
+      },
     };
   },
   computed: {
@@ -164,9 +188,6 @@ export default {
         }
         await timeout(400);
 
-        const dx = entity.coordinate.x - nextMove.x;
-        const dy = entity.coordinate.y - nextMove.y;
-
         move.execute(this.level, entity.entityID, entity.moves[0], nextMove);
 
         this.clearPossiblemoves();
@@ -175,6 +196,8 @@ export default {
       await timeout(200);
       if (endStage) {
         this.isInTransition = true;
+        this.transitionType =
+          this.level.nextLevel === "the_end" ? "gameClear" : "stageClear";
       } else {
         this.$emit("endTurn");
       }
@@ -188,6 +211,12 @@ export default {
       }
     },
     isPlayerTurn() {
+      if (this.player.health <= 0) {
+        this.isInTransition = true;
+        this.transitionType = "stageFail";
+        this.isPlayerTurn = true;
+        return;
+      }
       if (!this.isPlayerTurn) {
         this.enemyTurn();
       }
@@ -209,17 +238,17 @@ export default {
   <div id="game_area" ref="gameArea">
     <Transition>
       <div class="stage_transition" v-if="isInTransition">
-        <p>Stage Clear</p>
+        <p>{{ this.transition[this.transitionType].header }}</p>
         <button
           class="stage_transition__button"
           @click="
             () => {
               this.isInTransition = false;
-              this.$emit('endStage');
+              this.$emit(this.transition[this.transitionType].emit);
             }
           "
         >
-          next stage
+          {{ this.transition[this.transitionType].button }}
         </button>
       </div>
     </Transition>
